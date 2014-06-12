@@ -1,0 +1,26 @@
+
+.negative {
+	border-left:4px solid #FF3B30;
+}
+.positive {
+	border-left:4px solid #5AD427;
+}
+.inwork{
+	border-left:4px solid #5AC8FB;
+}
+}
+.info-extra{
+	display:none;
+}
+.gold {
+	border-left:4px solid #FFDB4C;
+}
+.image-icon{
+	width:20px;
+}
+.row.dataset_options > div{
+	display:none;
+}
+.row.dataset_options > div.active{
+	display:block;
+}
