@@ -1,3 +1,4 @@
+# TODO - needs to be rewritten
 from django.conf.urls import patterns, include, url
 from django.views.generic.base import TemplateView
 from django.contrib.auth.decorators import login_required

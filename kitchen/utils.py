@@ -1,3 +1,4 @@
+# TODO - needs to be rewritten
 import requests 
 from models import Job, Task, DataItem, Answer
 from django.conf import settings

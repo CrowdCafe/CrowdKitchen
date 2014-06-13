@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-#coding: utf8 
 from django.db import models
 
 from social_auth.models import UserSocialAuth
@@ -43,10 +41,10 @@ def calculateCommission(amount):
 
 class App(models.Model):
     account = models.ForeignKey(Account)
-    user = models.ForeignKey(User)
+    owner = models.ForeignKey(User) # the one created the app
     token = models.CharField(max_length=40, primary_key=True)
     title = models.CharField(max_length=100, default="-")
-    callback = models.URLField(unique=True) # ??? why do we need this callback
+    callback_url = models.URLField(unique=True) # ??? why do we need this callback
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
 
     def save(self, *args, **kwargs):
@@ -62,6 +60,7 @@ JOB_STATUS_CHOISES = (('NP', 'Not published'), ('PB', 'Published'), ('DL', 'Dele
 class Job(models.Model):
     #general
     app = models.ForeignKey(App)
+    owner = models.ForeignKey(User) # the one created the job
     title = models.CharField(max_length=255, default='New task')
     description = models.CharField(max_length=1024, default='***')
     category = models.CharField(max_length=2, default='CF', blank=True)
@@ -72,7 +71,7 @@ class Job(models.Model):
     userinterface_url = models.URLField(null = True, blank = True) # ??? I think that this can be skipped - and just become a part of job creation
     userinterface_html = models.TextField(null = True, blank = True)
     
-    #qualitycontrol
+    #qualitycontrol ??? if feels that all these columns it is better to store in a single key - value table (JobSettingsInt, JobSettingsChar). Reason - we might have a huge number of settings later on and get rid of some we have now
     gold_min = models.IntegerField(default = 0, null = True)
     gold_max = models.IntegerField(default = 0, null = True)
     score_min = models.IntegerField(default = 0, null = True)
@@ -93,6 +92,17 @@ class Job(models.Model):
         except:
             return False
 
+# here is how I would store all the settings from gold_min to qualitycontrol_url
+class JobSettingsInt(models.Model):
+    job = models.ForeignKey(App)
+    attribute = models.CharField(max_length=48)
+    value = dataunits_per_task = models.IntegerField()
+
+class JobSettingsChar(models.Model):
+    job = models.ForeignKey(App)
+    attribute = models.CharField(max_length=48)
+    value = dataunits_per_task = models.CharField(max_length=256)
+
 DATAUNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'), ('DL', 'Deleted'))
 
 class DataUnit(models.Model):
@@ -110,7 +120,7 @@ TASK_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'), ('DL', 'Del
 
 class Task(models.Model):
     job = models.ForeignKey(Job)
-    user = models.ForeignKey(User, blank = True)
+    worker = models.ForeignKey(User, blank = True)
     status = models.CharField(max_length=2, choices=STATUS_CHOISE, default='ST')
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
 

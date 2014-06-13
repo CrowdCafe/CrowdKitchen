@@ -1,3 +1,4 @@
+# TODO - needs to be rewritten
 from django.shortcuts import get_object_or_404, render_to_response, redirect, HttpResponseRedirect
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse, reverse_lazy
@@ -60,6 +61,7 @@ def JobDataUpload(request, pk):
 	
 		saveDataItems(job,dataset)
 	return redirect(reverse('kitchen-job-data', kwargs={'pk': job.id}))
+
 class JobCreation(CreateView):
 	model = Job
 	template_name = "kitchen/crispy.html"
@@ -109,43 +111,4 @@ class JobUpdate(UpdateView):
 		job = form.save()
 		job.refresh_template()
 		return HttpResponseRedirect(self.get_success_url())
-
-class QualityControlUpdate(UpdateView):
-	model = QualityControl
-	template_name = "kitchen/crispy.html"
-	form_class = QualityControlForm
-
-	def get_initial(self):
-		initial = {}
-		return initial
-
-	def get_success_url(self):
-		return reverse_lazy('kitchen-home')
-	def form_invalid(self, form):
-		log.debug("form is not valid")
-		print (form.errors)
-		return UpdateView.form_invalid(self, form)
-	def get_queryset(self):
-		return QualityControl.objects.filter(pk=self.kwargs.get('pk', None), job__owner = self.request.user) # or request.POST
-	def form_valid(self, form):
-		log.debug("updated")
-		form.save()
-		return HttpResponseRedirect(self.get_success_url())
-
-@login_required
-def Home(request):
-	jobs = Job.objects.filter(owner = request.user).exclude(status='DL').order_by('-date_created').all()
-	return render_to_response('kitchen/home.html', {'jobs':jobs}, context_instance=RequestContext(request))
-
-@login_required
-def JobData(request, pk):
-	job = get_object_or_404(Job,pk = pk, owner = request.user)
-	dataitems = DataItem.objects.filter(job = job)
-	return render_to_response('kitchen/job/dataitems.html', {'dataitems':dataitems,'job':job}, context_instance=RequestContext(request))
-
-@login_required
-def JobWorkers(request, pk):
-	job = get_object_or_404(Job,pk = pk, owner = request.user)
-	answers = Answer.objects.filter(task__job = job, status = 'FN').order_by('executor').order_by('-date_created')
-	return render_to_response('kitchen/job/answers.html', {'answers':answers,'job':job}, context_instance=RequestContext(request))
 
