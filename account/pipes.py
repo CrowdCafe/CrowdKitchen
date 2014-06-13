@@ -1,4 +1,3 @@
-#from social_auth.backends.facebook import FacebookBackend
 from models import Profile, Account
 import time
 import logging
@@ -14,8 +13,14 @@ def get_user_addinfo(backend, details, response, social_user, uid,\
 
     if created:
         log.debug('created')
+        #create a new personal account and add this user to this account
+        account = Account()
+        account.save()
+        account.add()
+        account.users.add(user)
+        account.save()
+    
     else:
         log.debug('name: %s' %(user.username))
-    #if facebook then steal data
     profile.save()
-    account = Account.objects.get_or_create(profile=profile)
+    account = Account.objects.get_or_create(user=user)

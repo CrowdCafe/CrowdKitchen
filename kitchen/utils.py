@@ -1,6 +1,4 @@
 import requests 
-from apiTwitter import TwitterCall
-from apiInstagram import InstagramCall
 from models import Job, Task, DataItem, Answer
 from django.conf import settings
 
@@ -8,7 +6,6 @@ import re
 import csv
 import urllib2
 import StringIO
-import scraperwiki 
 
 def getGithubRepositoryFiles(extention):
 	repository = settings.GITHUB_HTML_TEMPLATES['repository']
@@ -40,25 +37,6 @@ def saveDataItems(job,dataset):
 					dataitem.gold = True
 			dataitem.save()
 		#createTasks(job)
-
-def createTasks(job):
-	i = 0
-
-	items_out_tasks = []
-	items_in_tasks = DataItem.objects.filter(job = job).all()
-	
-	for item in items_in_tasks:
-		if len(item.tasks) == 0:
-			items_out_tasks.append(item)
-	
-	for item in items_out_tasks:
-		if i < len(items_out_tasks) - len(items_out_tasks) % job.qualitycontrol.dataitems_per_task:
-			if i % job.qualitycontrol.dataitems_per_task == 0:
-				task = Task(job=job)
-				task.save()
-			task.dataitems.add(item)
-			task.save()
-		i+=1
 
 def collectDataFromCSV(url):
 	dataset = []

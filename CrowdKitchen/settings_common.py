@@ -194,7 +194,6 @@ INSTALLED_APPS = (
     'storages',
     'account',
     'kitchen',
-    'qualitycontrol',
     'api',
     'rest_framework',
     'rest_framework.authtoken',
