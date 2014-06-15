@@ -5,13 +5,13 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
-from models import Job, Task, DataItem, Attachment, Answer
-from qualitycontrol.models import QualityControl
+from models import Job, Task, DataUnit, Answer
+
 from social_auth.models import UserSocialAuth
 from django.contrib.auth.decorators import user_passes_test
 from django.core.files.storage import default_storage as s3_storage
 
-from forms import JobForm,QualityControlForm
+from forms import JobForm
 
 from django.views.generic.edit import CreateView, UpdateView
 from django.views.generic.list import ListView

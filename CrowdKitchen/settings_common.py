@@ -13,6 +13,8 @@ GITHUB_HTML_TEMPLATES = {
     'repository':'crowdcafe-ui-templates'
 }
 
+ACCOUNT_ACTIVATION_DAYS = 7 # One-week activation window; you may, of course, use a different value.
+
 TASK_CATEGORIES = {
     'CF':{
         'id':'CF',
@@ -188,6 +190,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    #'registration',
     'social_auth',
     'mobi',
     'crispy_forms',
@@ -199,9 +202,10 @@ INSTALLED_APPS = (
     'rest_framework.authtoken',
     'corsheaders',
     'requests',
-    'djangobower'
+    'djangobower',
+    'djrill',
     # Uncomment the next line to enable the admin:
-    # 'django.contrib.admin',
+    'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
 )
@@ -280,9 +284,9 @@ REST_FRAMEWORK = {
     'DEFAULT_MODEL_SERIALIZER_CLASS':
         'rest_framework.serializers.HyperlinkedModelSerializer'
     ,
-    #'DEFAULT_RENDERER_CLASSES': (
-    #    'rest_framework_csv.renderers.CSVRenderer',
-    #),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework_csv.renderers.HTMLFormRenderer',
+    ),
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
     #'DEFAULT_PERMISSION_CLASSES': [
@@ -312,6 +316,9 @@ CORS_ALLOW_HEADERS = (
         'authorization',
         'x-csrftoken'
     )
+
+EMAIL_BACKEND = "djrill.mail.backends.djrill.DjrillBackend"
+#EMAIL_BACKEND = 'django_mandrill.mail.backends.mandrillbackend.EmailBackend'
 
 
 

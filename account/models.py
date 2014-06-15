@@ -28,10 +28,11 @@ class Profile(models.Model):
 
 # Class for grouping several users to one billing account. Can be useful - if there is an organization, or a research team, which consists of 3 people working together.
 class Account(models.Model):
-    users = models.ManyToMany(User)
-
-    total_earnings =  models.FloatField(default = 0) #sum of all fundtransfer amounts, where to_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
-    total_spendings =  models.FloatField(default = 0) #sum of all fundtransfer amounts, where from_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
+    users = models.ManyToManyField(User)
+    title = models.CharField(max_length=256, blank = True)
+    creator =  models.ForeignKey(User, related_name = 'Creator') 
+    total_earnings =  models.FloatField(default = 0, blank = True) #sum of all fundtransfer amounts, where to_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
+    total_spendings =  models.FloatField(default = 0, blank = True) #sum of all fundtransfer amounts, where from_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
 
     def recalculate(self, total_type): # 'earnings', 'spendings'
         if (total_type == 'earnings'):

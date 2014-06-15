@@ -17,107 +17,50 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_csv import renderers as r
 from rest_framework.settings import api_settings
 
-from kitchen.models import Job, Task, DataItem
-from serializers import JobSerializer,TaskSerializer, UserSerializer,AnswerDataCSVSerializer
+from account.models import Account, Profile
+from django.contrib.auth.models import User
+from kitchen.models import Job, Task, DataUnit
 
-from kitchen.utils import saveDataItems
+from serializers import AccountSerializer, ProfileSerializer, UserSerializer
+from rest_framework import routers
 
 
 import requests
 
-
-@api_view(['POST'])
-# @permission_classes((IsFromApp, ))
-def create_user(request):
+class AccountView(viewsets.ModelViewSet):
     """
-    Create the user, only who has an app registered
+    CRUD of Account
     """
-    if request.method == 'POST':
-        log.debug(request.DATA)
-        crowd_user = CrowdUserSerializer(data=request.DATA)
-        log.debug(crowd_user.is_valid())
-        if crowd_user.is_valid():
-            try:
-                log.debug("%s %s" % (type(crowd_user.data), crowd_user.data))
-                log.debug(crowd_user.data['username'])
-                if len(User.objects.all().filter(username=crowd_user.data['username'])) == 0:
-                    user = User(username=crowd_user.data['username'], password=crowd_user.data['password'],
-                                email=crowd_user.data['email'])
-                    user.save()
-                    c_user = CrowdUser(user=user)
-                    c_user.save()
-                    return Response(status=status.HTTP_201_CREATED)
-                else:
-                    return Response(status=status.HTTP_406_NOT_ACCEPTABLE, data={'detail': 'user exists'})
-            except Exception as exc:
-                log.debug(exc)
-                return Response(status=status.HTTP_406_NOT_ACCEPTABLE, data={'detail':str(exc)})
-        else:
-            log.debug(crowd_user.errors)
-            raise exceptions.ParseError(detail=crowd_user.errors)
+    model = Account
+    serializer_class = AccountSerializer
 
-@api_view(['POST'])
-def uploadItems(request, job_id):
+    def pre_save(self, obj):
+        # init values
+        user = self.request.user
+        obj.creator = user
 
-	job = get_object_or_404(Job, pk = job_id, owner = request.user)
+    # used to filter out based on the url
+    def get_queryset(self):
+        return Account.objects.filter(creator=self.request.user)
 
-	print job.id
-	print request.POST
-	print request.user.id
+class UserView(viewsets.ModelViewSet):
+    model = User
+    serializer_class = UserSerializer
 
-	if request.POST:
-		print 'dataset exists'
-		saveDataItems(job,[request.POST])
-		
-	return Response()
+    def list(self, request, *args, **kwargs):
+        log.debug("it's the list")
+        log.debug("pk %s", self.kwargs['task_pk'])
+        ''' this checks if the user owns the task, if so then the instances are displayed,
+        if it's not his task then there's an exeception.
+         it's a dirty way to do auth'''
 
-@api_view(['GET'])
-def getUser(request):
-	serializer = UserSerializer(request.user)
-	return Response(serializer.data)
+        return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
 
-@api_view(['GET'])
-def getJobs(request):
-	tasks = Job.objects.filter(status = 'ST').all()
-	serializer = JobSerializer(tasks)
-	return Response(serializer.data)
-
-@api_view(['GET'])
-def getTask(request, job_id):
-	job = get_object_or_404(Job, pk = job_id)
-	task = Task.objects.filter(task = task).all()[0]
-	serializer = TaskSerializer(task)
-	return Response(serializer.data)
-
-@api_view(['GET'])
-@login_required
-def getAnswers(request, job_id):
-	tasks = Task.objects.filter(job__id = job_id,job__owner = request.user).all()
-	serializer = TaskSerializer(taskinstances)
-	return Response(serializer.data)
-
-@login_required
-def readUrl(request):
-	output = 'nothing'
-	if 'url' in request.GET:
-		url = 'http://en.m.wikipedia.org/wiki/'+request.GET['url']
-		f = requests.get(url)
-		output = f.text
-	return HttpResponse(output)
+    def get_queryset(self):
+        return Account.objects.get(pk=self.kwargs['account_pk']).users
 
 
-@api_view(['GET'])
-@login_required
-def getCSV(request, job_id):
-	answeritems = []
-	tasks = Task.objects.filter(job__id = task_id,job__owner = request.user)
-	if 'status' in request.GET:
-		tasks.filter(status = request.GET['status'])
-	tasks = tasks.all()
-	for task in tasks:
-		for answer in task.answers:
-			for answeritem in answer.answeritems:
-				answeritems.append(answeritem)
-
-	serializer = AnswerDataCSVSerializer(answeritems)
-	return Response(serializer.data)
+router = routers.SimpleRouter()
+router.register(r'account', AccountView)
+#account_router = routers.NestedSimpleRouter(router, r'account', lookup='account')
+#account_router.register(r'user', UserView)

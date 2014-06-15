@@ -27,7 +27,7 @@ import binascii
 from rest_framework.authtoken.models import Token
 
 
-CATEGORY_CHOICES (('CF','Espresso'),('CP','Cappuccino'),('WN','Wine'),('ZT','Volunteering')) # TODO need to bring this touples and dictionary in settings_common TASK_CATEGORIES to something in common
+CATEGORY_CHOICES = (('CF','Espresso'),('CP','Cappuccino'),('WN','Wine'),('ZT','Volunteering')) #TODO need to bring this touples and dictionary in settings_common TASK_CATEGORIES to something in common
 DEVICE_CHOISES = (('MO', 'Mobile only'), ('DO', 'Desktop only'), ('AD', 'Any device'))
 
 
@@ -96,12 +96,12 @@ class Job(models.Model):
 class JobSettingsInt(models.Model):
     job = models.ForeignKey(App)
     attribute = models.CharField(max_length=48)
-    value = dataunits_per_task = models.IntegerField()
+    value = models.IntegerField()
 
 class JobSettingsChar(models.Model):
     job = models.ForeignKey(App)
     attribute = models.CharField(max_length=48)
-    value = dataunits_per_task = models.CharField(max_length=256)
+    value = models.CharField(max_length=256)
 
 DATAUNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'), ('DL', 'Deleted'))
 
@@ -121,7 +121,7 @@ TASK_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'), ('DL', 'Del
 class Task(models.Model):
     job = models.ForeignKey(Job)
     worker = models.ForeignKey(User, blank = True)
-    status = models.CharField(max_length=2, choices=STATUS_CHOISE, default='ST')
+    status = models.CharField(max_length=2, choices=TASK_STATUS_CHOISES, default='ST')
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
 
 

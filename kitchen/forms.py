@@ -1,9 +1,9 @@
 from django import forms
 from datetime import date, timedelta
-from models import App, Job, Task, DataItem, Answer
+from models import App, Job, Task, DataUnit, Answer
 from account.models import Account
 
-from models import STATUS_CHOISE
+from models import JOB_STATUS_CHOISES
 from django.conf import settings
 
 from django.contrib.auth.models import User
@@ -27,7 +27,7 @@ class JobForm(ModelForm):
 	title = forms.CharField(label=(u'Title')) # ??? what is the difference between (u'Title') and 'Title'?
 	description = forms.CharField(label=(u'Description'), widget=forms.Textarea())
 	webhook_url = forms.URLField(label='Webhook', required=False)
-	status = forms.ChoiceField(choices=STATUS_CHOISE, widget=forms.Select(), initial = 'NP', label=(u'Status'), required=False)
+	status = forms.ChoiceField(choices=JOB_STATUS_CHOISES, widget=forms.Select(), initial = 'NP', label=(u'Status'), required=False)
 	category = forms.ChoiceField(choices=settings.TASK_CATEGORIES_DICTIONARY, initial = 'ZT', widget=forms.Select(), label=(u'Category'), required=False)
 	userinterface_url = forms.URLField(label='UserInterface url', required=False)
 	

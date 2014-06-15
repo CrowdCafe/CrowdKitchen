@@ -5,79 +5,64 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.template import RequestContext
 from django.contrib.auth import logout, authenticate, login
 import logging
-from forms import LoginForm
+from django.contrib.auth.models import User
+from django.core.context_processors import csrf 
+from forms import LoginForm, UserCreateForm
+from models import Account, Profile
+from django.views.generic.edit import CreateView, UpdateView
+from django.shortcuts import render
+from django.http import HttpResponseRedirect    
+
+from rest_framework.authtoken.models import Token
 
 log = logging.getLogger(__name__)
 
-def Logout(request):
+def register_user(request):
+    template_name = 'kitchen/crispy.html'
+
+    if request.method == 'POST':
+        user_form = UserCreateForm(request.POST)
+        if user_form.is_valid():
+            username = user_form.clean_username()
+            password = user_form.clean_password2()
+            user_form.save()
+
+            user = authenticate(username=username,
+                                password=password)
+            profile = Profile(user = user)
+            profile.save()
+            account = Account(creator = user)
+            account.save()
+            account.users.add(user)
+            account.save()
+
+            login(request, user)
+            return redirect('/')
+        return render(request,
+                      template_name,
+                      { 'form' : user_form })
+    args = {}
+    args.update(csrf(request))
+    args['form'] = UserCreateForm()
+    print args
+    return render(request, template_name, args)
+def login_user(request):
+    template_name = 'kitchen/crispy.html'
+
+    if request.method == 'POST':
+        #TODO - need to fix this part
+        user = authenticate(username=request.POST['username'], password=request.POST['password'])
+        print user
+        if user is not None:
+            login(request, user)
+            token = Token.objects.get_or_create(user=user)
+            return redirect('/')           
+        else:
+            return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
+    else:
+        form = LoginForm()
+        return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
+def logout_user(request):
 	logout(request)
 	return redirect('/')
 
-def login(request):
-    # if request.user.is_authenticated():
-    #     return redirect('/')
-    callback = request.GET.get('callback', '')
-    if not callback.endswith("/"):
-        callback=callback+"/"
-    log.debug("callback %s",callback)
-    if request.method == 'POST':
-        form = LoginForm(request.POST)
-        if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-            user = authenticate(username=username, password=password)
-            if user is not None:
-                auth_app = user.crowduser.auth_apps.all()
-                try:
-                    app = App.objects.get(callback=callback)
-                except Exception:
-                    raise Http404
-                token = Token.objects.get(user=user)
-
-                if app not in auth_app:
-                    log.debug("not in app")
-                    return redirect(reverse(auth)+"?callback="+callback+"&token="+token.key)
-                else:
-                    log.debug("in app")
-                # log.debug("Username %s",user.username)
-                # get the app
-                # apptoken = request.META.get('HTTP_AUTHORIZATION', b'')
-                callback = request.GET.get('callback', '')
-                if type(callback) == type(''):
-                    raise Http404
-                token = Token.objects.get(user=user)
-                redirect_to = callback+"?token="+token.key
-                return HttpResponseRedirect(redirect_to)
-            else:
-                messages.info(request,'username and password not valid')
-
-
-                form.helper.form_action = reverse('login') + '?callback=' + callback
-                render_to_response('ui/login.html',  {'form': form}, context_instance=RequestContext(request))
-        else:
-            form.helper.form_action = reverse('login') + '?callback=' + callback
-
-            render_to_response('ui/login.html', {'form': form}, context_instance=RequestContext(request))
-    else:
-        form = LoginForm()
-        form.helper.form_action = reverse('login') + '?callback=' + callback
-        # context = {'form': form,'callback':callback}
-        # context = {}
-        return render_to_response('kitchen/crispy.html',  {'form': form}, context_instance=RequestContext(request))
-
-def auth(request):
-    callback = request.GET.get('callback', '')
-    token = request.GET.get('token', '')
-    if not callback.endswith("/"):
-        callback=callback+"/"
-    if request.method == 'POST':
-        token = Token.objects.get(key=token)
-        app = App.objects.get(callback=callback)
-        crowduser = token.user.crowduser
-        crowduser.auth_apps.add(app)
-        crowduser.save()
-        redirect_to = callback+"?token="+token.key+"&id="+crowduser.user.pk
-        return HttpResponseRedirect(redirect_to)
-    else:
-        app = App.objects.get(callback=callback)
-        return render_to_response('kitchen/crispy.html',  {'app': app,'callback':callback,'token':token}, context_instance=RequestContext(request))

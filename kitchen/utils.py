@@ -1,6 +1,6 @@
 # TODO - needs to be rewritten
 import requests 
-from models import Job, Task, DataItem, Answer
+from models import Job, Task, DataUnit, Answer
 from django.conf import settings
 
 import re
