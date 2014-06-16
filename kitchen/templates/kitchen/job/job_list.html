@@ -1,0 +1,25 @@
+{% extends 'base.html'%}
+{%load static%}
+
+{% block title%}
+<div class='container'>
+	<h1>Jobs</h1>
+	<a href = '{% url "job-create" %}'>create job</a>
+</div>
+{% endblock%}
+
+{% block content%}
+
+<div class="container">
+	{% for job in object_list %}
+	<div class="row">
+		<div class="col-sm-6 col-sm-offset-3">
+			<h6><a href="{% url 'job-update' job.id%}">{{job.title}}</a></h6>
+		</div>
+	</div>
+	{% empty %}
+	<h3>No jobs yet.</h3>
+	{% endfor %}
+
+</div>
+{% endblock%}

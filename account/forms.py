@@ -19,6 +19,21 @@ class UserCreateForm(UserCreationForm):
 
         super(UserCreateForm, self).__init__(*args, **kwargs)
 
+class AccountForm(ModelForm):
+    creator = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput)
+
+    class Meta:
+        model = Account
+        exclude = ('users','total_earnings','total_spendings')
+
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form-vertical'
+        self.helper.add_input(Submit('submit', 'Save'))
+        # self.helper.action = self.helper.action + "?callback="+ kwargs['callback']
+        super(AccountForm, self).__init__(*args, **kwargs)
+
 class LoginForm(AuthenticationForm):
     
     def __init__(self, *args, **kwargs):

@@ -19,7 +19,7 @@ from rest_framework.settings import api_settings
 
 from account.models import Account, Profile
 from django.contrib.auth.models import User
-from kitchen.models import Job, Task, DataUnit
+from kitchen.models import Job, DataUnit
 
 from serializers import AccountSerializer, ProfileSerializer, UserSerializer
 from rest_framework import routers

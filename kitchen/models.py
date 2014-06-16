@@ -28,21 +28,15 @@ from rest_framework.authtoken.models import Token
 
 
 CATEGORY_CHOICES = (('CF','Espresso'),('CP','Cappuccino'),('WN','Wine'),('ZT','Volunteering')) #TODO need to bring this touples and dictionary in settings_common TASK_CATEGORIES to something in common
+
 DEVICE_CHOISES = (('MO', 'Mobile only'), ('DO', 'Desktop only'), ('AD', 'Any device'))
-
-
-def getPlatformOwner():
-    return User.objects.filter(pk = settings.BUSINESS['platform_owner_id']).get()
-    
-def calculateCommission(amount):
-    return amount * settings.BUSINESS['platform_commission']
 
 # JOBS RELATED CLASSES:
 
 class App(models.Model):
     account = models.ForeignKey(Account)
-    owner = models.ForeignKey(User) # the one created the app
-    token = models.CharField(max_length=40, primary_key=True)
+    creator = models.ForeignKey(User) # the one created the app
+    token = models.CharField(max_length=40, primary_key=True, blank = True)
     title = models.CharField(max_length=100, default="-")
     callback_url = models.URLField(unique=True) # ??? why do we need this callback
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
@@ -60,30 +54,25 @@ JOB_STATUS_CHOISES = (('NP', 'Not published'), ('PB', 'Published'), ('DL', 'Dele
 class Job(models.Model):
     #general
     app = models.ForeignKey(App)
-    owner = models.ForeignKey(User) # the one created the job
+    creator = models.ForeignKey(User) # the one created the job
     title = models.CharField(max_length=255, default='New task')
-    description = models.CharField(max_length=1024, default='***')
+    description = models.TextField()
     category = models.CharField(max_length=2, default='CF', blank=True)
+    price = models.FloatField() # reward given to a worker per data_unit #ASK - is this name appropriate? wage/rate/cost/reward?
     status = models.CharField(max_length=2, choices=JOB_STATUS_CHOISES, default='NP')
-    date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
-    
-    #userinterface
-    userinterface_url = models.URLField(null = True, blank = True) # ??? I think that this can be skipped - and just become a part of job creation
-    userinterface_html = models.TextField(null = True, blank = True)
-    
-    #qualitycontrol ??? if feels that all these columns it is better to store in a single key - value table (JobSettingsInt, JobSettingsChar). Reason - we might have a huge number of settings later on and get rid of some we have now
-    gold_min = models.IntegerField(default = 0, null = True)
-    gold_max = models.IntegerField(default = 0, null = True)
-    score_min = models.IntegerField(default = 0, null = True)
-    dataunits_per_task = models.IntegerField(default = 5)
-    min_answers_per_item = models.IntegerField(default = 1)
-    max_dataunits_per_worker = models.IntegerField(default = 100) # ??? TODO Some limitation of amount of dataunits single worker can complete  
-    device_type = models.CharField(max_length=2, choices=DEVICE_CHOISES, default='AD')
-    qualitycontrol_url = models.URLField(null = True, blank = True)
 
+    dataunits_per_page = models.IntegerField(default = 5)
+    device_type = models.CharField(max_length=2, choices=DEVICE_CHOISES, default='AD')
+    date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
     #other
     webhook_url = models.URLField(null = True, blank = True)
     
+    #userinterface
+    userinterface_url = models.URLField(null = True, blank = True)
+    userinterface_html = models.TextField(null = True, blank = True)
+    #make sure we do not have anly volnurabilities in userinterface_html
+    def __unicode__(self):
+        return str(self.id)
     def refreshUserInterface(self):
         try:
             self.userinterface_html = urllib2.urlopen(self.userinterface_url).read()
@@ -92,44 +81,45 @@ class Job(models.Model):
         except:
             return False
 
-# here is how I would store all the settings from gold_min to qualitycontrol_url
-class JobSettingsInt(models.Model):
-    job = models.ForeignKey(App)
-    attribute = models.CharField(max_length=48)
-    value = models.IntegerField()
+class QualityControl(models.Model):
+    job = models.OneToOneField(Job)
+    min_answers_per_dataunit = models.IntegerField(default = 1)
+    max_dataunits_per_worker = models.IntegerField(default = 100) # Some limitation of amount of dataunits single worker can complete  
+    def __unicode__(self):
+        return str(self.id)
 
-class JobSettingsChar(models.Model):
-    job = models.ForeignKey(App)
-    attribute = models.CharField(max_length=48)
-    value = models.CharField(max_length=256)
+class GoldQualityControl(QualityControl):
+    gold_min = models.IntegerField(default = 0, null = True)
+    gold_max = models.IntegerField(default = 0, null = True)
+    score_min = models.IntegerField(default = 0, null = True)
+    qualitycontrol_url = models.URLField(null = True, blank = True)
+    def __unicode__(self):
+        return str(self.id)
 
 DATAUNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'), ('DL', 'Deleted'))
 
 class DataUnit(models.Model):
     job = models.ForeignKey(Job)
-    value = jsonfield.JSONField()
-    gold = models.BooleanField(default=False)
+    input_data = jsonfield.JSONField()
     status = models.CharField(max_length=2, choices=DATAUNIT_STATUS_CHOISES, default = 'NC')
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
 
     def __unicode__(self):
         return str(self.id)
 
+class GoldDataUnit(DataUnit):
+    expected_data = jsonfield.JSONField()
+    def __unicode__(self):
+        return str(self.id)
+
 # ANSWERS RELATED CLASSES
-TASK_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'), ('DL', 'Deleted'))
-
-class Task(models.Model):
-    job = models.ForeignKey(Job)
-    worker = models.ForeignKey(User, blank = True)
-    status = models.CharField(max_length=2, choices=TASK_STATUS_CHOISES, default='ST')
-    date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
-
 
 class Answer(models.Model):
-    task = models.ForeignKey(Task)
-    datanit = models.ForeignKey(DataUnit, blank = True)
-    value = jsonfield.JSONField(blank = True)
+    dataunit = models.ForeignKey(DataUnit, blank = True)
+    output_data = jsonfield.JSONField(blank = True)
     score = models.FloatField(default = 0.0, null = True, blank = True)
-
+    worker = models.ForeignKey(User, blank = True)
+    date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
+    
     def __unicode__(self):
         return str(self.id)

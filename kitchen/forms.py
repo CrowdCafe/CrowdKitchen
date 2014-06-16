@@ -1,6 +1,6 @@
 from django import forms
 from datetime import date, timedelta
-from models import App, Job, Task, DataUnit, Answer
+from models import App, Job, DataUnit, Answer
 from account.models import Account
 
 from models import JOB_STATUS_CHOISES
@@ -21,25 +21,20 @@ from utils import getGithubRepositoryFiles
 log = logging.getLogger(__name__)
 
 class JobForm(ModelForm):
-	owner = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput)
+	creator = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput)
+	account = forms.ModelChoiceField(queryset=Account.objects.all(), widget=forms.HiddenInput)
+	
 	app = forms.ModelChoiceField(queryset=App.objects.all(), widget=forms.HiddenInput)
 
-	title = forms.CharField(label=(u'Title')) # ??? what is the difference between (u'Title') and 'Title'?
-	description = forms.CharField(label=(u'Description'), widget=forms.Textarea())
-	webhook_url = forms.URLField(label='Webhook', required=False)
-	status = forms.ChoiceField(choices=JOB_STATUS_CHOISES, widget=forms.Select(), initial = 'NP', label=(u'Status'), required=False)
-	category = forms.ChoiceField(choices=settings.TASK_CATEGORIES_DICTIONARY, initial = 'ZT', widget=forms.Select(), label=(u'Category'), required=False)
-	userinterface_url = forms.URLField(label='UserInterface url', required=False)
 	
 	class Meta:
 		model = Job
-		exclude = ('date_deadline','date_created','template_html')
+		exclude = ('date_deadline','date_created')
 	def __init__(self, *args, **kwargs):
 		self.helper = FormHelper()
 		self.helper.form_method = 'post'
 		self.helper.add_input(Submit('submit', 'Save'))
 		self.helper.form_class = 'form-vertical'
-		self.helper.layout = Layout(Fieldset('Job','title', 'description','userinterface_url','category','status','webhook_url','owner','app'))
 		super(JobForm, self).__init__(*args, **kwargs)
 
 class AppForm(ModelForm):
@@ -54,5 +49,4 @@ class AppForm(ModelForm):
 		self.helper.form_method = 'post'
 		self.helper.add_input(Submit('submit', 'Save'))
 		self.helper.form_class = 'form-vertical'
-		self.helper.layout = Layout(Fieldset('Application','title', 'callback_url','owner','account'))
 		super(AppForm, self).__init__(*args, **kwargs)

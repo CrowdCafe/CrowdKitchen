@@ -1,6 +1,6 @@
 # TODO - needs to be rewritten
 import requests 
-from models import Job, Task, DataUnit, Answer
+from models import Job, DataUnit, Answer
 from django.conf import settings
 
 import re
@@ -37,24 +37,7 @@ def saveDataItems(job,dataset):
 					print item
 					dataitem.gold = True
 			dataitem.save()
-		#createTasks(job)
 
-def collectDataFromCSV(url):
-	dataset = []
-	pattern = re.compile(u'[^\u0000-\uD7FF\uE000-\uFFFF]', re.UNICODE)
-	data = scraperwiki.scrape(url)
-	reader = csv.reader(data.splitlines(), delimiter = ';')
-	i = 0
-	for row in reader:    
-		if i == 0:
-			headers = row
-		else:
-			dataitem = {}
-			for j in range(len(row)):
-				dataitem[headers[j]] = pattern.sub(u'\uFFFD', row[j]).decode('latin-1').encode("utf-8")
-			dataset.append(dataitem)
-		i+=1
-	return dataset
 
 def collectDataFromSocialNetwork(keyword, amount, socialnetwork):
 	if socialnetwork == 0: # Twitter

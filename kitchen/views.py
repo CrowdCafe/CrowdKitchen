@@ -5,7 +5,7 @@ from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
-from models import Job, Task, DataUnit, Answer
+from models import Job, DataUnit, Answer
 
 from social_auth.models import UserSocialAuth
 from django.contrib.auth.decorators import user_passes_test
@@ -23,46 +23,12 @@ import re
 import csv
 import urllib2
 import StringIO
-import scraperwiki 
 
 log = logging.getLogger(__name__)
 
-from utils import getGithubRepositoryFiles, saveDataItems, collectDataFromCSV,collectDataFromSocialNetwork,collectDataFromTwitter,simplifyInstagramDataset,collectDataFromInstagram
+from utils import getGithubRepositoryFiles, saveDataItems,collectDataFromSocialNetwork,collectDataFromTwitter,simplifyInstagramDataset,collectDataFromInstagram
 
-def JobDataUpload(request, pk):
-	job = get_object_or_404(Job,pk = pk, owner =request.user)
-
-	# -----------------------
-	# Input dataset
-	# -----------------------
-	dataset = []
-	if 'dataset_option_selected' in request.POST:
-		dataset_option = request.POST['dataset_option_selected']
-		if dataset_option == 'survey':
-			dataset = [{'no data':'survey'}]
-		elif dataset_option == 'dataset':
-			if request.FILES:
-				if 'dataset' in request.FILES:
-				
-					dataset_file = Attachment(job = job)
-					dataset_file.file.save(str(job.id)+request.FILES['dataset'].name, request.FILES['dataset'])
-					dataset_file.save()
-					
-					dataset = collectDataFromCSV(dataset_file.file.url)
-		
-		elif dataset_option == 'feed' and request.POST['feed_handler'] and request.POST['feed_amount'] and request.POST['feed-type']:	
-			keyword = request.POST['feed_handler']
-			amount = int(request.POST['feed_amount'])
-			feed_type = int(request.POST['feed-type'])
-			if feed_type == 0: # Twitter
-				dataset = collectDataFromTwitter(keyword, amount)
-			if feed_type == 2: # Instagram
-				dataset = simplifyInstagramDataset(collectDataFromInstagram(keyword, amount))
-	
-		saveDataItems(job,dataset)
-	return redirect(reverse('kitchen-job-data', kwargs={'pk': job.id}))
-
-class JobCreation(CreateView):
+class JobCreateView(CreateView):
 	model = Job
 	template_name = "kitchen/crispy.html"
 	form_class = JobForm
@@ -88,7 +54,14 @@ class JobCreation(CreateView):
 
 		return redirect(reverse('kitchen-job-data', kwargs={'pk': job.id}))
 
-class JobUpdate(UpdateView):
+class JobListView(ListView):
+	model = Job
+	template_name = "kitchen/job/job_list.html"
+	def get_context_data(self, **kwargs):
+		context = super(JobListView, self).get_context_data(**kwargs)
+		return context
+
+class JobUpdateView(UpdateView):
 	model = Job
 	template_name = "kitchen/crispy.html"
 	form_class = JobForm
