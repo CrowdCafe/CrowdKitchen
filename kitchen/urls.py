@@ -9,13 +9,11 @@ urlpatterns = patterns('',
     #===============================================================================
     # Views
     #-------------------------------------------------------------------------------
-    #url(r'apps/$', login_required(views.AppListView.as_view()), name='app-list'),
-    #url(r'apps/create/$', login_required(views.AppCreateView.as_view()), name='app-create'),
-    #url(r'apps/(?P<pk>\d+)/update/$', login_required(views.AppUpdateView.as_view()), name='app-update'),
+    url(r'accounts/(?P<account_pk>\d+)/apps/$', login_required(views.AppListView.as_view()), name='app-list'),
+    url(r'accounts/(?P<account_pk>\d+)/apps/create/$', login_required(views.AppCreateView.as_view()), name='app-create'),
+    url(r'apps/(?P<app_pk>\d+)/update/$', login_required(views.AppUpdateView.as_view()), name='app-update'),
 
-    url(r'jobs/$', login_required(views.JobListView.as_view()), name='job-list'),
-    url(r'jobs/create/$', login_required(views.JobCreateView.as_view()), name='job-create'),
-    url(r'jobs/(?P<pk>\d+)/update/$', login_required(views.JobUpdateView.as_view()), name='job-update'),
-
-
+    url(r'apps/(?P<app_pk>\d+)/jobs/$', login_required(views.JobListView.as_view()), name='job-list'),
+    url(r'apps/(?P<app_pk>\d+)/jobs/create/$', login_required(views.JobCreateView.as_view()), name='job-create'),
+    url(r'jobs/(?P<job_pk>\d+)/update/$', login_required(views.JobUpdateView.as_view()), name='job-update'),
   )

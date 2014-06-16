@@ -18,6 +18,10 @@ from django.views.generic.list import ListView
 
 log = logging.getLogger(__name__)
 
+# -------------------------------------------------------------
+# Users
+# -------------------------------------------------------------
+
 def register_user(request):
     template_name = 'kitchen/crispy.html'
 
@@ -48,6 +52,10 @@ def register_user(request):
     print args
     return render(request, template_name, args)
 
+def logout_user(request):
+    logout(request)
+    return redirect('/')    
+
 def login_user(request):
     template_name = 'kitchen/crispy.html'
 
@@ -64,6 +72,9 @@ def login_user(request):
     else:
         form = LoginForm()
         return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
+# -------------------------------------------------------------
+# Accounts
+# -------------------------------------------------------------
 
 class AccountListView(ListView):
     model = Account
@@ -93,6 +104,20 @@ class AccountCreateView(CreateView):
         account.save()
 
         return redirect(reverse('account-list'))
-def logout_user(request):
-	logout(request)
-	return redirect('/')    
+
+class AccountUpdateView(UpdateView):
+    model = Account
+    template_name = "kitchen/crispy.html"
+    form_class = AccountForm
+
+    def form_invalid(self, form):
+        log.debug("form is not valid")
+        print (form.errors)
+        return UpdateView.form_invalid(self, form)
+    def get_object(self):
+        return get_object_or_404(Account, pk = self.kwargs.get('account_pk', None), creator = self.request.user)
+   
+    def form_valid(self, form):
+        log.debug("updated")
+        account = form.save()
+        return redirect(reverse('account-list'))

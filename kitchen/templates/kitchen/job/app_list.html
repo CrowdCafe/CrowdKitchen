@@ -3,22 +3,22 @@
 
 {% block title%}
 <div class='container'>
-	<h1>Jobs</h1>
-	<a href = '{% url "job-create" app.id %}'>create job</a>
+	<h1>Apps</h1>
+	<a href = '{% url "app-create" account.id %}'>create app</a>
 </div>
 {% endblock%}
 
 {% block content%}
 
 <div class="container">
-	{% for job in object_list %}
+	{% for app in object_list %}
 	<div class="row">
 		<div class="col-sm-6 col-sm-offset-3">
-			<h6>{{job.title}} <a href="{% url 'job-update' job.id%}">update</a> </a></h6>
+			<h6>{{app.title}} <a href="{% url 'app-update' app.id %}">update</a> <a href="{% url 'job-list' app.id %}">jobs</a></h6>
 		</div>
 	</div>
 	{% empty %}
-	<h3>No jobs yet.</h3>
+	<h3>No apps yet.</h3>
 	{% endfor %}
 
 </div>

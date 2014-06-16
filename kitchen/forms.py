@@ -22,10 +22,7 @@ log = logging.getLogger(__name__)
 
 class JobForm(ModelForm):
 	creator = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput)
-	account = forms.ModelChoiceField(queryset=Account.objects.all(), widget=forms.HiddenInput)
-	
 	app = forms.ModelChoiceField(queryset=App.objects.all(), widget=forms.HiddenInput)
-
 	
 	class Meta:
 		model = Job
@@ -38,12 +35,12 @@ class JobForm(ModelForm):
 		super(JobForm, self).__init__(*args, **kwargs)
 
 class AppForm(ModelForm):
-	owner = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput)
+	creator = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput)
 	account = forms.ModelChoiceField(queryset=Account.objects.all(), widget=forms.HiddenInput)
 
 	class Meta:
 		model = App
-		exclude = ('date_created','token')
+		exclude = ('token')
 	def __init__(self, *args, **kwargs):
 		self.helper = FormHelper()
 		self.helper.form_method = 'post'

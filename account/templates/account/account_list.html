@@ -14,7 +14,7 @@
 	{% for account in object_list %}
 	<div class="row">
 		<div class="col-sm-6 col-sm-offset-3">
-			<h6>{{account.title}}</h6>
+			<h6>{{account.title}} <a href='{% url "app-list" account.id %}'>apps</a> <a href='{% url "account-update" account.id %}'>update</a></h6>
 		</div>
 	</div>
 	{% empty %}

@@ -36,9 +36,9 @@ DEVICE_CHOISES = (('MO', 'Mobile only'), ('DO', 'Desktop only'), ('AD', 'Any dev
 class App(models.Model):
     account = models.ForeignKey(Account)
     creator = models.ForeignKey(User) # the one created the app
-    token = models.CharField(max_length=40, primary_key=True, blank = True)
-    title = models.CharField(max_length=100, default="-")
-    callback_url = models.URLField(unique=True) # ??? why do we need this callback
+    token = models.CharField(max_length=40, blank = True)
+    title = models.CharField(max_length=100)
+    callback_url = models.URLField(unique=True) #ASK why do we need this callback
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
 
     def save(self, *args, **kwargs):
@@ -47,7 +47,9 @@ class App(models.Model):
         return super(App, self).save(*args, **kwargs)
 
     def __unicode__(self):
-        return '' + str(self.owner.username) + ' - ' + str(self.name) # TODO this should be redone according to accounts approach
+        return str(self.id)
+    #def __unicode__(self):
+    #    return '' + str(self.owner.username) + ' - ' + str(self.name) # TODO this should be redone according to accounts approach
 
 JOB_STATUS_CHOISES = (('NP', 'Not published'), ('PB', 'Published'), ('DL', 'Deleted'))
 
@@ -55,7 +57,7 @@ class Job(models.Model):
     #general
     app = models.ForeignKey(App)
     creator = models.ForeignKey(User) # the one created the job
-    title = models.CharField(max_length=255, default='New task')
+    title = models.CharField(max_length=255, default='New job')
     description = models.TextField()
     category = models.CharField(max_length=2, default='CF', blank=True)
     price = models.FloatField() # reward given to a worker per data_unit #ASK - is this name appropriate? wage/rate/cost/reward?

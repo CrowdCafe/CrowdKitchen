@@ -7,8 +7,9 @@ urlpatterns = patterns('',
 	url(r'api/', include('api.urls')),
 	url(r'admin/', include(admin.site.urls)),
 	url(r'', include('social_auth.urls')),
-	url(r'', include('kitchen.urls')),
+
     #url(r'api/', include('api.urls')),
-    url(r'users/', include('account.urls')),
-    #url(r'^accounts/', include('registration.backends.default.urls')),
+    url(r'', include('account.urls')),
+    url(r'', include('kitchen.urls')),
+
     )
