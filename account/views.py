@@ -21,7 +21,11 @@ log = logging.getLogger(__name__)
 # -------------------------------------------------------------
 # Users
 # -------------------------------------------------------------
-
+def home(request):
+    if request.user.is_authenticated():
+        return redirect('account-list')
+    else:
+        return redirect('login')
 def register_user(request):
     template_name = 'kitchen/crispy.html'
 
