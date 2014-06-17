@@ -32,8 +32,8 @@ class Account(models.Model):
     title = models.CharField(max_length=256)
     personal = models.BooleanField(default = False)
     creator =  models.ForeignKey(User, related_name = 'Creator') 
-    total_earnings = models.DecimalField(max_digits=8, decimal_places=2) #sum of all fundtransfer amounts, where to_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
-    total_spendings = models.DecimalField(max_digits=8, decimal_places=2) #sum of all fundtransfer amounts, where from_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
+    total_earnings = models.DecimalField(max_digits=8, decimal_places=2, default =0.00) #sum of all fundtransfer amounts, where to_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
+    total_spendings = models.DecimalField(max_digits=8, decimal_places=2, default =0.00) #sum of all fundtransfer amounts, where from_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
     deleted = models.DateTimeField(blank = True, null = True) 
     def recalculate(self, total_type): # 'earnings', 'spendings'
         if (total_type == 'earnings'):
@@ -51,9 +51,8 @@ MEMBERSHIP_TYPE = (('AN','Admin'),('MR','Member'))
 class Membership(models.Model):
     user = models.ForeignKey(User)
     account = models.ForeignKey(Account)
-    permission = models.CharField(max_length=2, choices=MEMBERSHIP_TYPE)
-    date_joined = models.DateField()
-    invite_reason = models.CharField(max_length=64)
+    permission = models.CharField(max_length=2, choices=MEMBERSHIP_TYPE, default = 'AN')
+    date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
 
 CURRENCY_TYPE = (('RM','Real Money'),('VM','Virtual Money'))
 # when a worker earns money - they go from requestor to a worker

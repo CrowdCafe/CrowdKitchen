@@ -8,7 +8,7 @@ import logging
 from django.contrib.auth.models import User
 from django.core.context_processors import csrf 
 from forms import LoginForm, UserCreateForm, AccountForm
-from models import Account, Profile
+from models import Account, Profile, Membership
 from django.views.generic.edit import CreateView, UpdateView
 from django.shortcuts import render
 from django.http import HttpResponseRedirect    
@@ -42,8 +42,8 @@ def register_user(request):
             profile.save()
             account = Account(creator = user, personal = True, title = 'personal account')
             account.save()
-            account.users.add(user)
-            account.save()
+            membership = Membership(user = user, permission = 'AN', account = account)
+            membership.save()
 
             login(request, user)
             return redirect('/')
@@ -69,13 +69,10 @@ def login_user(request):
         print user
         if user is not None:
             login(request, user)
-            token = Token.objects.get_or_create(user=user)
-            return redirect('/')           
-        else:
-            return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
-    else:
-        form = LoginForm()
-        return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
+            #token = Token.objects.get_or_create(user=user)
+            return redirect('/')
+    form = LoginForm()
+    return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
 # -------------------------------------------------------------
 # Accounts
 # -------------------------------------------------------------

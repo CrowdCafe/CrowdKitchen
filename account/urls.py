@@ -16,9 +16,9 @@ urlpatterns = patterns('',
     #url(r'^auth/$',views.auth,name='auth'),
     url(r'^$',views.home),
 
-    url(r'^login/$',views.login_user,name='login'),
-    url(r'^create/$', views.register_user, name='register'),
-    url(r'^logout/$', views.logout_user, name='logout'),
+    url(r'^user/login/$',views.login_user,name='login'),
+    url(r'^user/register/$', views.register_user, name='register'),
+    url(r'^user/logout/$', views.logout_user, name='logout'),
     
 
     url(r'^accounts/$', views.AccountListView.as_view(), name='account-list'),
