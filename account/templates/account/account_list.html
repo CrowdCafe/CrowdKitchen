@@ -4,22 +4,32 @@
 {% block title%}
 <div class='container'>
 	<h1>Your accounts</h1>
-	<a href = '{% url "account-create" %}'>create account</a>
+	<a href = '{% url "account-create" %}' class='btn btn-default'>create account</a>
 </div>
 {% endblock%}
 
 {% block content%}
-
 <div class="container">
-	{% for account in object_list %}
-	<div class="row">
-		<div class="col-sm-6 col-sm-offset-3">
-			<h6>{{account.title}} <a href='{% url "app-list" account.id %}'>apps</a> <a href='{% url "account-update" account.id %}'>update</a></h6>
+	<table class='table table-hover'>
+		{% for account in object_list %}
+		<tr>
+			<td>#{{account.id}}
+			</td>
+			<td>{{account.title}} {% if account.personal %} <i>personal</i>{% endif %}
+			</td>
+			<td>earnings: {{account.total_earnings}} euro
+			</td>
+			<td>spendings: {{account.total_spendings}} euro
+			</td>
+			<td><a href="{% url 'app-list' account.id %}">apps</a>
+			</td>
+			<td>
+				<a href="{% url 'account-update' account.id %}" class='btn btn-default'>edit</a>
+			</td>
 		</div>
-	</div>
+	</tr>
 	{% empty %}
-	<h3>No accounts yet.</h3>
+	<h3>No apps yet.</h3>
 	{% endfor %}
-
 </div>
 {% endblock%}

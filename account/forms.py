@@ -10,13 +10,13 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 #NOTICE We need to use these forms https://github.com/django/django/blob/master/django/contrib/auth/forms.py
 
 class UserCreateForm(UserCreationForm):
+    email = forms.EmailField(label=(u'Email'))
     
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.add_input(Submit('submit', 'Register'))
         self.helper.form_class = 'form-vertical'
-
         super(UserCreateForm, self).__init__(*args, **kwargs)
 
 class AccountForm(ModelForm):
@@ -24,14 +24,13 @@ class AccountForm(ModelForm):
 
     class Meta:
         model = Account
-        exclude = ('users','total_earnings','total_spendings')
+        exclude = ('users','total_earnings','total_spendings','personal')
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', 'Save'))
-        # self.helper.action = self.helper.action + "?callback="+ kwargs['callback']
         super(AccountForm, self).__init__(*args, **kwargs)
 
 class LoginForm(AuthenticationForm):
@@ -41,5 +40,4 @@ class LoginForm(AuthenticationForm):
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-vertical'
         self.helper.add_input(Submit('submit', 'Login'))
-        # self.helper.action = self.helper.action + "?callback="+ kwargs['callback']
         super(LoginForm, self).__init__(*args, **kwargs)

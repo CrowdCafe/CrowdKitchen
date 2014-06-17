@@ -40,7 +40,7 @@ def register_user(request):
                                 password=password)
             profile = Profile(user = user)
             profile.save()
-            account = Account(creator = user)
+            account = Account(creator = user, personal = True, title = 'personal account')
             account.save()
             account.users.add(user)
             account.save()
@@ -83,6 +83,8 @@ def login_user(request):
 class AccountListView(ListView):
     model = Account
 
+    def get_queryset(self):
+        return Account.objects.filter(users__in=[self.request.user.id]) #TODO make sure it is correct
     def get_context_data(self, **kwargs):
         context = super(AccountListView, self).get_context_data(**kwargs)
         return context
@@ -119,7 +121,7 @@ class AccountUpdateView(UpdateView):
         print (form.errors)
         return UpdateView.form_invalid(self, form)
     def get_object(self):
-        return get_object_or_404(Account, pk = self.kwargs.get('account_pk', None), creator = self.request.user)
+        return get_object_or_404(Account, pk = self.kwargs.get('account_pk', None), users__in = [self.request.user.id])
    
     def form_valid(self, form):
         log.debug("updated")

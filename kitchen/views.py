@@ -70,7 +70,9 @@ class AppUpdateView(UpdateView):
 class AppListView(ListView):
 	model = App
 	template_name = "kitchen/job/app_list.html"
-
+	def get_queryset(self):
+		account = get_object_or_404(Account, pk = self.kwargs.get('account_pk', None), users__in = [self.request.user.id])
+		return App.objects.filter(account = account)
 	def get_context_data(self, **kwargs):
 		context = super(AppListView, self).get_context_data(**kwargs)
 		context['account'] = get_object_or_404(Account,pk = self.kwargs.get('account_pk', None))
@@ -119,6 +121,10 @@ class JobUpdateView(UpdateView):
 class JobListView(ListView):
 	model = Job
 	template_name = "kitchen/job/job_list.html"
+	
+	def get_queryset(self):
+		app = get_object_or_404(App, pk = self.kwargs.get('app_pk', None), account__users__in = [self.request.user.id])
+		return Job.objects.filter(app = app)
 
 	def get_context_data(self, **kwargs):
 		context = super(JobListView, self).get_context_data(**kwargs)

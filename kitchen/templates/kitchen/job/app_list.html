@@ -3,20 +3,28 @@
 
 {% block title%}
 <div class='container'>
-	<h1>Apps</h1>
-	<a href = '{% url "app-create" account.id %}'>create app</a>
+	<h1>Apps <a href = '{% url "app-create" account.id %}' class='btn btn-default'>create app</a></h1>
+	
 </div>
 {% endblock%}
 
 {% block content%}
 
 <div class="container">
-	{% for app in object_list %}
-	<div class="row">
-		<div class="col-sm-6 col-sm-offset-3">
-			<h6>{{app.title}} <a href="{% url 'app-update' app.id %}">update</a> <a href="{% url 'job-list' app.id %}">jobs</a></h6>
+	<table class='table table-hover'>
+		{% for app in object_list %}
+		<tr>
+			<td>#{{app.id}}
+			</td>
+			<td>{{app.title}}
+			</td>
+			<td><a href="{% url 'job-list' app.id %}">jobs</a>
+			</td>
+			<td>
+				<a href="{% url 'app-update' app.id %}" class='btn btn-default'>edit</a>
+			</td>
 		</div>
-	</div>
+	</tr>
 	{% empty %}
 	<h3>No apps yet.</h3>
 	{% endfor %}
