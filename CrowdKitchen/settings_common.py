@@ -190,7 +190,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    #'registration',
     'social_auth',
     'mobi',
     'crispy_forms',

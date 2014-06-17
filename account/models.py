@@ -28,7 +28,7 @@ class Profile(models.Model):
 
 # Class for grouping several users to one billing account. Can be useful - if there is an organization, or a research team, which consists of 3 people working together.
 class Account(models.Model):
-    users = models.ManyToManyField(User)
+    users = models.ManyToManyField(User, through = 'Membership')
     title = models.CharField(max_length=256)
     personal = models.BooleanField(default = False)
     creator =  models.ForeignKey(User, related_name = 'Creator') 
@@ -46,13 +46,15 @@ class Account(models.Model):
     def balance(self):
         return self.total_earning - self.total_spending
 
-'''class Membership(models.Model):
+MEMBERSHIP_TYPE = (('AN','Admin'),('MR','Member'))
+
+class Membership(models.Model):
     user = models.ForeignKey(User)
     account = models.ForeignKey(Account)
-
+    permission = models.CharField(max_length=2, choices=MEMBERSHIP_TYPE)
     date_joined = models.DateField()
     invite_reason = models.CharField(max_length=64)
-'''
+
 CURRENCY_TYPE = (('RM','Real Money'),('VM','Virtual Money'))
 # when a worker earns money - they go from requestor to a worker
 # when a worker/requestor wants to send money to another user - they do it via fundtransfer

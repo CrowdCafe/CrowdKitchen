@@ -59,7 +59,7 @@ class Job(models.Model):
     creator = models.ForeignKey(User) # the one created the job
     title = models.CharField(max_length=255, default='New job')
     description = models.TextField()
-    category = models.CharField(max_length=2, default='CF', blank=True)
+    category = models.CharField(max_length=2, default='CF',choices=CATEGORY_CHOICES, blank=True)
     price = models.FloatField() # reward given to a worker per data_unit #ASK - is this name appropriate? wage/rate/cost/reward?
     status = models.CharField(max_length=2, choices=JOB_STATUS_CHOISES, default='NP')
 
