@@ -3,7 +3,12 @@
 
 {% block title%}
 <div class='container'>
-	<h1>Jobs <a href = '{% url "job-create" app.id %}' class='btn btn-default'>create job</a></h1>
+	<h1>Jobs</h1>
+	<p>
+		<a href = '{% url "app-list" app.account.id %}' class='btn btn-default'>apps</a>
+		<a href = '{% url "job-create" app.id %}' class='btn btn-primary'>create job</a>
+
+	</p>
 	
 </div>
 {% endblock%}
@@ -14,7 +19,7 @@
 	<table class='table table-hover'>
 		{% for job in object_list %}
 		<tr>
-			<td>#{{job.id}}
+			<td>id:{{job.id}}
 			</td>
 			<td>{{job.title}}
 			</td>

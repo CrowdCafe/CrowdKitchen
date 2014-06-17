@@ -24,7 +24,7 @@ class AccountForm(ModelForm):
 
     class Meta:
         model = Account
-        exclude = ('users','total_earnings','total_spendings','personal')
+        exclude = ('deleted','users','total_earnings','total_spendings','personal')
 
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()

@@ -32,8 +32,9 @@ class Account(models.Model):
     title = models.CharField(max_length=256)
     personal = models.BooleanField(default = False)
     creator =  models.ForeignKey(User, related_name = 'Creator') 
-    total_earnings =  models.FloatField(default = 0, blank = True) #sum of all fundtransfer amounts, where to_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
-    total_spendings =  models.FloatField(default = 0, blank = True) #sum of all fundtransfer amounts, where from_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
+    total_earnings = models.DecimalField(max_digits=8, decimal_places=2) #sum of all fundtransfer amounts, where to_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
+    total_spendings = models.DecimalField(max_digits=8, decimal_places=2) #sum of all fundtransfer amounts, where from_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
+    deleted = models.DateTimeField(blank = True, null = True) 
     def recalculate(self, total_type): # 'earnings', 'spendings'
         if (total_type == 'earnings'):
             self.total_earning = FundTransfer.objects.filter(to_account = self).aggregate(Sum('amount'))['amount__sum']
@@ -45,15 +46,20 @@ class Account(models.Model):
     def balance(self):
         return self.total_earning - self.total_spending
 
+'''class Membership(models.Model):
+    user = models.ForeignKey(User)
+    account = models.ForeignKey(Account)
 
+    date_joined = models.DateField()
+    invite_reason = models.CharField(max_length=64)
+'''
 CURRENCY_TYPE = (('RM','Real Money'),('VM','Virtual Money'))
 # when a worker earns money - they go from requestor to a worker
 # when a worker/requestor wants to send money to another user - they do it via fundtransfer
 class FundTransfer(models.Model):
-
     from_account = models.ForeignKey(Account, related_name = 'from_account', blank = True, null = True)
     to_account = models.ForeignKey(Account, related_name = 'to_account', blank = True, null = True)
     currency = models.CharField(max_length=2, choices=CURRENCY_TYPE)
-    amount = models.FloatField(default = 0)
+    amount = models.DecimalField(max_digits=8, decimal_places=2)
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
     description = models.CharField(max_length=1000, blank = True) # when we generate transfers we might add here a description - what this transfer is for.

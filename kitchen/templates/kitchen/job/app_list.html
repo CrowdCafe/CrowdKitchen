@@ -3,7 +3,11 @@
 
 {% block title%}
 <div class='container'>
-	<h1>Apps <a href = '{% url "app-create" account.id %}' class='btn btn-default'>create app</a></h1>
+	<h1>Apps</h1>
+	<p>
+		<a href = '{% url "account-list" %}' class='btn btn-default' >accounts</a>
+		<a href = '{% url "app-create" account.id %}' class='btn btn-primary'>create app</a>
+	</p>
 	
 </div>
 {% endblock%}

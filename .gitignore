@@ -1,3 +1,6 @@
+*/migrations/
+*/migrations/*
+
 scraperwiki.sqlite
 components/bower_components
 .bowerrc

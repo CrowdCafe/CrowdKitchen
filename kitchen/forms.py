@@ -26,7 +26,7 @@ class JobForm(ModelForm):
 	
 	class Meta:
 		model = Job
-		exclude = ('date_deadline','date_created')
+		exclude = ('deleted','date_deadline','date_created')
 	def __init__(self, *args, **kwargs):
 		self.helper = FormHelper()
 		self.helper.form_method = 'post'
@@ -40,10 +40,11 @@ class AppForm(ModelForm):
 
 	class Meta:
 		model = App
-		exclude = ('token')
+		exclude = ('deleted','token')
 	def __init__(self, *args, **kwargs):
 		self.helper = FormHelper()
 		self.helper.form_method = 'post'
 		self.helper.add_input(Submit('submit', 'Save'))
 		self.helper.form_class = 'form-vertical'
 		super(AppForm, self).__init__(*args, **kwargs)
+		

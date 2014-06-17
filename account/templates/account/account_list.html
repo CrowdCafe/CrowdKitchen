@@ -3,8 +3,8 @@
 
 {% block title%}
 <div class='container'>
-	<h1>Your accounts</h1>
-	<a href = '{% url "account-create" %}' class='btn btn-default'>create account</a>
+	<h1>Accounts</h1>
+	<a href = '{% url "account-create" %}' class='btn btn-primary'>create account</a>
 </div>
 {% endblock%}
 
@@ -13,7 +13,7 @@
 	<table class='table table-hover'>
 		{% for account in object_list %}
 		<tr>
-			<td>#{{account.id}}
+			<td>#{{forloop.counter}}
 			</td>
 			<td>{{account.title}} {% if account.personal %} <i>personal</i>{% endif %}
 			</td>

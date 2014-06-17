@@ -27,7 +27,7 @@ import binascii
 from rest_framework.authtoken.models import Token
 
 
-CATEGORY_CHOICES = (('CF','Espresso'),('CP','Cappuccino'),('WN','Wine'),('ZT','Volunteering')) #TODO need to bring this touples and dictionary in settings_common TASK_CATEGORIES to something in common
+CATEGORY_CHOICES = (('CF','Espresso'),('CP','Cappuccino'),('WN','Wine')) #TODO need to bring this touples and dictionary in settings_common TASK_CATEGORIES to something in common
 
 DEVICE_CHOISES = (('MO', 'Mobile only'), ('DO', 'Desktop only'), ('AD', 'Any device'))
 
@@ -38,7 +38,7 @@ class App(models.Model):
     creator = models.ForeignKey(User) # the one created the app
     token = models.CharField(max_length=40, blank = True)
     title = models.CharField(max_length=100)
-    callback_url = models.URLField(unique=True) #ASK why do we need this callback
+    deleted = models.DateTimeField(blank = True, null = True) 
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
 
     def save(self, *args, **kwargs):
@@ -51,7 +51,7 @@ class App(models.Model):
     #def __unicode__(self):
     #    return '' + str(self.owner.username) + ' - ' + str(self.name) # TODO this should be redone according to accounts approach
 
-JOB_STATUS_CHOISES = (('NP', 'Not published'), ('PB', 'Published'), ('DL', 'Deleted'))
+JOB_STATUS_CHOISES = (('NP', 'Not published'), ('PB', 'Published'))
 
 class Job(models.Model):
     #general
@@ -73,6 +73,7 @@ class Job(models.Model):
     userinterface_url = models.URLField(null = True, blank = True)
     userinterface_html = models.TextField(null = True, blank = True)
     #make sure we do not have anly volnurabilities in userinterface_html
+    deleted = models.DateTimeField(blank = True, null = True) 
     def __unicode__(self):
         return str(self.id)
     def refreshUserInterface(self):
@@ -98,14 +99,14 @@ class GoldQualityControl(QualityControl):
     def __unicode__(self):
         return str(self.id)
 
-DATAUNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'), ('DL', 'Deleted'))
+DATAUNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'))
 
 class DataUnit(models.Model):
     job = models.ForeignKey(Job)
     input_data = jsonfield.JSONField()
     status = models.CharField(max_length=2, choices=DATAUNIT_STATUS_CHOISES, default = 'NC')
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False) 
-
+    deleted = models.DateTimeField(blank = True, null = True) 
     def __unicode__(self):
         return str(self.id)
 
