@@ -23,6 +23,11 @@ urlpatterns = patterns('',
 
     url(r'^accounts/$', views.AccountListView.as_view(), name='account-list'),
     url(r'^accounts/create/$', views.AccountCreateView.as_view(), name='account-create'),
-    url(r'^accounts/(?P<account_pk>\d+)/update/', views.AccountUpdateView.as_view(), name='account-update'),
+    url(r'^accounts/(?P<account_pk>\d+)/update/$', views.AccountUpdateView.as_view(), name='account-update'),
+
+    url(r'^accounts/(?P<account_pk>\d+)/members/$', views.MembershipListView.as_view(), name='member-list'),
+    url(r'^accounts/(?P<account_pk>\d+)/members/create/$', views.MembershipCreateView.as_view(), name='member-create'),
+    url(r'^members/(?P<member_pk>\d+)/update/$', views.MembershipUpdateView.as_view(), name='member-update'),
+
 
 )

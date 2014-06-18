@@ -25,6 +25,8 @@ import csv
 import urllib2
 import StringIO
 
+from utils import unitJob
+
 log = logging.getLogger(__name__)
 
 # -------------------------------------------------------------
@@ -100,6 +102,7 @@ class JobCreateView(CreateView):
 		log.debug("saved")
 		job = form.save()
 		job.save()
+		unitJob(initJob)
 
 		return redirect(reverse('job-list', kwargs={'app_pk': job.app.id}))
 
@@ -116,6 +119,7 @@ class JobUpdateView(UpdateView):
 	def form_valid(self, form):
 		log.debug("updated")
 		job = form.save()
+		unitJob(initJob)
 		return redirect(reverse('job-list', kwargs={'app_pk': job.app.id}))
 
 class JobListView(ListView):

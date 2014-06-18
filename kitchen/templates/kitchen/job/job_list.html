@@ -1,5 +1,4 @@
 {% extends 'base.html'%}
-{%load static%}
 
 {% block title%}
 <div class='container'>
@@ -9,28 +8,20 @@
 		<a href = '{% url "job-create" app.id %}' class='btn btn-primary'>create job</a>
 
 	</p>
-	
 </div>
 {% endblock%}
 
 {% block content%}
-
 <div class="container">
 	<table class='table table-hover'>
 		{% for job in object_list %}
 		<tr>
-			<td>id:{{job.id}}
-			</td>
-			<td>{{job.title}}
-			</td>
-			<td>{{job.price}} euro
-			</td>
-			<td><a href="#">data</a>
-			</td>
-
-			<td>
-				<a href="{% url 'job-update' job.id %}" class='btn btn-default'>edit</a>
-			</td>
+			<td>#{{forloop.counter}}</td>
+			<td>id:{{job.id}}</td>
+			<td>{{job.title}}</td>
+			<td>{{job.price}} euro</td>
+			<td><a href="#">data</a></td>
+			<td><a href="{% url 'job-update' job.id %}" class='btn btn-default'>edit</a></td>
 		</div>
 	</tr>
 	{% empty %}

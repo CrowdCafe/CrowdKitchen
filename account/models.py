@@ -49,6 +49,8 @@ class Account(models.Model):
 MEMBERSHIP_TYPE = (('AN','Admin'),('MR','Member'))
 
 class Membership(models.Model):
+    class Meta:
+        unique_together = ['user', 'account']
     user = models.ForeignKey(User)
     account = models.ForeignKey(Account)
     permission = models.CharField(max_length=2, choices=MEMBERSHIP_TYPE, default = 'AN')

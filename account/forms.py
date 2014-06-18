@@ -2,24 +2,63 @@ from crispy_forms.helper import FormHelper
 from django.contrib.auth.models import User
 from crispy_forms.layout import Submit, Fieldset, Layout, Button, HTML
 from django import forms
-from models import Profile, Account
+from models import Profile, Account, Membership
 from django.forms.forms import Form
 from django.forms import ModelForm
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm 
 
-#NOTICE We need to use these forms https://github.com/django/django/blob/master/django/contrib/auth/forms.py
-
 class UserCreateForm(UserCreationForm):
+
     email = forms.EmailField(label=(u'Email'))
+    first_name = forms.CharField(label=(u'First name'))
+    last_name = forms.CharField(label=(u'Last name'))
     
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
+        self.helper.layout = Layout(Fieldset('Registration', 'username', 'email', 'first_name','last_name','password1','password2'))
         self.helper.add_input(Submit('submit', 'Register'))
         self.helper.form_class = 'form-vertical'
         super(UserCreateForm, self).__init__(*args, **kwargs)
 
+class LoginForm(AuthenticationForm):
+    
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.form_class = 'form-vertical'
+        self.helper.layout = Layout(
+            Fieldset(
+            'Login to CrowdCafe',
+            'username',
+            'password',
+            HTML("""
+                 <div class="row">
+                  <div class="col-sm-2">
+                    <input type = 'submit' value='Login' class='btn-block btn btn-primary'>
+                    </div>
+                    <div class="col-sm-1 center">
+                    <p>or</p>
+                    </div>
+                 <div class="col-sm-3">
+                    <a href="{% url 'socialauth_begin' 'facebook' %}" class="btn-block btn btn-facebook-inversed"><i class="fa fa-facebook"></i> Facebook </a>
+                    </div>
+                    <div class="col-sm-3">
+                    <a href="{% url 'socialauth_begin' 'google-oauth2' %}" class="btn-block btn btn-googleplus-inversed"><i class="fa fa-google-plus"></i> Google+ </a>
+                                        </div>
+                    <div class="col-sm-3">
+                    <a href="{% url 'socialauth_begin' 'github' %}" class="btn-block btn btn-github-inversed"><i class="fa fa-github"></i> Github </a>
+                    </div>
+                </div>
+                """),
+            )
+        )
+
+        #self.helper.add_input(Submit('submit', 'Login'))
+        super(LoginForm, self).__init__(*args, **kwargs)
+
 class AccountForm(ModelForm):
+    
     creator = forms.ModelChoiceField(queryset=User.objects.all(), widget=forms.HiddenInput)
 
     class Meta:
@@ -33,11 +72,17 @@ class AccountForm(ModelForm):
         self.helper.add_input(Submit('submit', 'Save'))
         super(AccountForm, self).__init__(*args, **kwargs)
 
-class LoginForm(AuthenticationForm):
+class MembershipForm(ModelForm):
     
+    account = forms.ModelChoiceField(queryset=Account.objects.all(), widget=forms.HiddenInput)
+
+    class Meta:
+        model = Membership
+        exclude = ('date_created')
+
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
         self.helper.form_class = 'form-vertical'
-        self.helper.add_input(Submit('submit', 'Login'))
-        super(LoginForm, self).__init__(*args, **kwargs)
+        self.helper.add_input(Submit('submit', 'Save'))
+        super(MembershipForm, self).__init__(*args, **kwargs)
