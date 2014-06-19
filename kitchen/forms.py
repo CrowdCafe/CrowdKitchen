@@ -16,7 +16,6 @@ from decimal import Decimal
 from django.utils.datetime_safe import datetime
 from django.forms.forms import Form
 from django.forms.fields import FileField
-from utils import getGithubRepositoryFiles
 
 log = logging.getLogger(__name__)
 

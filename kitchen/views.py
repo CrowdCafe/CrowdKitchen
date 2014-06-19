@@ -25,7 +25,7 @@ import csv
 import urllib2
 import StringIO
 
-from utils import unitJob
+from utils import initJob
 
 log = logging.getLogger(__name__)
 
