@@ -1,10 +1,10 @@
 # TODO - needs to be rewritten
 from django.conf.urls import patterns, include, url
+from django.contrib import admin
 from django.views.generic.base import TemplateView
 from django.contrib.auth.decorators import login_required
 
 import views
-
 urlpatterns = patterns('',
     #===============================================================================
     # Views
@@ -16,4 +16,5 @@ urlpatterns = patterns('',
     url(r'apps/(?P<app_pk>\d+)/jobs/$', login_required(views.JobListView.as_view()), name='job-list'),
     url(r'apps/(?P<app_pk>\d+)/jobs/create/$', login_required(views.JobCreateView.as_view()), name='job-create'),
     url(r'jobs/(?P<job_pk>\d+)/update/$', login_required(views.JobUpdateView.as_view()), name='job-update'),
+
   )

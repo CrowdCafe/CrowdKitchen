@@ -2,6 +2,8 @@
 #coding: utf8 
 
 import os
+
+
 PROJECT_ROOT = os.path.abspath(
     os.path.join(os.path.dirname(__file__), ".."),
 )
@@ -277,21 +279,27 @@ REST_FRAMEWORK = {
 # Use hyperlinked styles by default.
 # Only used if the `serializer_class` attribute is not set on a view.
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
-        'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.TokenAuthentication',
+        'api.authentication.TokenAppAuthentication',
+        # not needed, maybe only sessionAuth if we need to test it from the browser
+        # 'rest_framework.authentication.BasicAuthentication',
+        # 'rest_framework.authentication.SessionAuthentication',
+        # 'rest_framework.authentication.TokenAuthentication',
     ),
-    'DEFAULT_MODEL_SERIALIZER_CLASS':
-        'rest_framework.serializers.HyperlinkedModelSerializer'
-    ,
-    'DEFAULT_RENDERER_CLASSES': (
-        'rest_framework_csv.renderers.HTMLFormRenderer',
-    ),
+    # 'DEFAULT_RENDERER_CLASSES': (
+    #     'rest_framework_csv.renderers.HTMLFormRenderer',
+    # ),
     # Use Django's standard `django.contrib.auth` permissions,
     # or allow read-only access for unauthenticated users.
-    #'DEFAULT_PERMISSION_CLASSES': [
-    #'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    #]
+     'DEFAULT_PERMISSION_CLASSES': [
+         'rest_framework.permissions.IsAuthenticated',
+    #     'api.permissions.IsOwner'
+     ],
+    'TEST_REQUEST_DEFAULT_FORMAT': 'json',
+    'TEST_REQUEST_RENDERER_CLASSES': (
+        'rest_framework.renderers.MultiPartRenderer',
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.YAMLRenderer'
+    )
 }
 
 FACEBOOK_EXTENDED_PERMISSIONS = ['email']
