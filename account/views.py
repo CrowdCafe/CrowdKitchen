@@ -7,7 +7,7 @@ from django.contrib.auth import logout, authenticate, login
 import logging
 from django.contrib.auth.models import User
 from django.core.context_processors import csrf 
-from forms import LoginForm, UserCreateForm, AccountForm
+from forms import LoginForm, UserCreateForm, AccountForm, MembershipForm
 from models import Account, Profile, Membership
 from django.views.generic.edit import CreateView, UpdateView
 from django.shortcuts import render
@@ -18,15 +18,19 @@ from django.views.generic.list import ListView
 
 log = logging.getLogger(__name__)
 
+from utils import initUser
 # -------------------------------------------------------------
 # Users
 # -------------------------------------------------------------
 def home(request):
+    
     if request.user.is_authenticated():
         return redirect('account-list')
     else:
         return redirect('login')
+
 def register_user(request):
+    
     template_name = 'kitchen/crispy.html'
 
     if request.method == 'POST':
@@ -35,18 +39,20 @@ def register_user(request):
             username = user_form.clean_username()
             password = user_form.clean_password2()
             user_form.save()
-
+            
             user = authenticate(username=username,
                                 password=password)
-            profile = Profile(user = user)
-            profile.save()
-            account = Account(creator = user, personal = True, title = 'personal account')
-            account.save()
-            membership = Membership(user = user, permission = 'AN', account = account)
-            membership.save()
+            if user:
+                # save extra parameters - email, first name, last name
+                user.email = user_form.data['email']
+                user.first_name = user_form.data['first_name']
+                user.last_name = user_form.data['last_name']
+                user.save()
 
-            login(request, user)
-            return redirect('/')
+                initUser(user)
+
+                login(request, user)
+                return redirect('account-list')
         return render(request,
                       template_name,
                       { 'form' : user_form })
@@ -57,10 +63,12 @@ def register_user(request):
     return render(request, template_name, args)
 
 def logout_user(request):
+    
     logout(request)
     return redirect('/')    
 
 def login_user(request):
+    
     template_name = 'kitchen/crispy.html'
 
     if request.method == 'POST':
@@ -70,14 +78,16 @@ def login_user(request):
         if user is not None:
             login(request, user)
             #token = Token.objects.get_or_create(user=user)
-            return redirect('/')
+            return redirect('account-list')
     form = LoginForm()
     return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
+
 # -------------------------------------------------------------
 # Accounts
 # -------------------------------------------------------------
 
 class AccountListView(ListView):
+    
     model = Account
 
     def get_queryset(self):
@@ -87,6 +97,7 @@ class AccountListView(ListView):
         return context
 
 class AccountCreateView(CreateView):
+    
     model = Account
     template_name = "kitchen/crispy.html"
     form_class = AccountForm
@@ -95,6 +106,7 @@ class AccountCreateView(CreateView):
         initial = {}
         initial['creator'] = self.request.user
         return initial
+    
     def form_invalid(self, form):
         log.debug("form is not valid")
         print (form.errors)
@@ -109,6 +121,7 @@ class AccountCreateView(CreateView):
         return redirect(reverse('account-list'))
 
 class AccountUpdateView(UpdateView):
+    
     model = Account
     template_name = "kitchen/crispy.html"
     form_class = AccountForm
@@ -117,6 +130,7 @@ class AccountUpdateView(UpdateView):
         log.debug("form is not valid")
         print (form.errors)
         return UpdateView.form_invalid(self, form)
+    
     def get_object(self):
         return get_object_or_404(Account, pk = self.kwargs.get('account_pk', None), users__in = [self.request.user.id])
    
@@ -124,3 +138,60 @@ class AccountUpdateView(UpdateView):
         log.debug("updated")
         account = form.save()
         return redirect(reverse('account-list'))
+
+# -------------------------------------------------------------
+# Membership
+# -------------------------------------------------------------
+
+class MembershipCreateView(CreateView):
+    
+    model = Membership
+    template_name = "kitchen/crispy.html"
+    form_class = MembershipForm
+
+    def get_initial(self):
+        initial = {}
+        initial['account'] = get_object_or_404(Account, pk = self.kwargs.get('account_pk', None), users__in = [self.request.user.id])
+        return initial
+    
+    def form_invalid(self, form):
+        log.debug("form is not valid")
+        print (form.errors)
+        return CreateView.form_invalid(self, form)
+    
+    def form_valid(self, form):
+        log.debug("saved")
+        membership = form.save()
+
+        return redirect(reverse('member-list', kwargs={'account_pk': membership.account.id}))
+
+class MembershipUpdateView(UpdateView):
+    
+    model = Membership
+    template_name = "kitchen/crispy.html"
+    form_class = MembershipForm
+
+    def form_invalid(self, form):
+        log.debug("form is not valid")
+        print (form.errors)
+        return UpdateView.form_invalid(self, form)
+    def get_object(self):
+        return get_object_or_404(Membership, pk = self.kwargs.get('member_pk', None), account__users__in = [self.request.user.id])
+   
+    def form_valid(self, form):
+        log.debug("updated")
+        membership = form.save()
+        return redirect(reverse('member-list', kwargs={'account_pk': membership.account.id}))
+
+class MembershipListView(ListView):
+
+    model = Membership
+
+    def get_queryset(self):
+        account = get_object_or_404(Account, pk = self.kwargs.get('account_pk', None), users__in = [self.request.user.id])
+        return Membership.objects.filter(account = account)
+    
+    def get_context_data(self, **kwargs):
+        context = super(MembershipListView, self).get_context_data(**kwargs)
+        context['account'] = get_object_or_404(Account, pk = self.kwargs.get('account_pk', None))
+        return context
