@@ -29,7 +29,7 @@ class LoginForm(AuthenticationForm):
         self.helper.form_class = 'form-vertical'
         self.helper.layout = Layout(
             Fieldset(
-            'Login to CrowdCafe',
+            'Login',
             'username',
             'password',
             HTML("""
@@ -37,17 +37,20 @@ class LoginForm(AuthenticationForm):
                   <div class="col-sm-2">
                     <input type = 'submit' value='Login' class='btn-block btn btn-primary'>
                     </div>
-                    <div class="col-sm-1 center">
+                    <div class="col-sm-2 center">
                     <p>or</p>
                     </div>
-                 <div class="col-sm-3">
+                    <div class="col-sm-2">
                     <a href="{% url 'socialauth_begin' 'facebook' %}" class="btn-block btn btn-facebook-inversed"><i class="fa fa-facebook"></i> Facebook </a>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                     <a href="{% url 'socialauth_begin' 'google-oauth2' %}" class="btn-block btn btn-googleplus-inversed"><i class="fa fa-google-plus"></i> Google+ </a>
                                         </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                     <a href="{% url 'socialauth_begin' 'github' %}" class="btn-block btn btn-github-inversed"><i class="fa fa-github"></i> Github </a>
+                    </div>
+                    <div class="col-sm-2">
+                    <a href="{% url 'register' %}" class="btn-block btn btn-default"> Register </a>
                     </div>
                 </div>
                 """),
