@@ -1,12 +1,15 @@
+import json
 import logging
 
 from rest_framework.authentication import TokenAuthentication
-from rest_framework.decorators import api_view, authentication_classes
+from rest_framework.decorators import api_view, authentication_classes, action
+from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework import routers, viewsets
-from api.serializers import JobSerializer, Appserializer
+from rest_framework import routers, viewsets, status
+from rest_framework import exceptions
 
-from kitchen.models import Job, App
+from api.serializers import JobSerializer, Appserializer
+from kitchen.models import Job, App, DataUnit
 from serializers import UserSerializer
 
 
@@ -62,22 +65,37 @@ class AppViewSet(viewsets.ReadOnlyModelViewSet):
         #  the job of the user with the requested app
         return App.objects.filter(account__in=self.request.user.account_set.all())
 
+
 class JobsViewSet(viewsets.ModelViewSet):
     serializer_class = JobSerializer
     model = Job
+    paginate_by = 10
 
     def get_queryset(self):
         #  the job of the user with the requested app
-        return Job.objects.filter(creator=self.request.user, app=self.request.app)
+        # ASK: filtering only by app?
+        return Job.objects.filter(app=self.request.app)
 
     def create(self, request):
         # disable this function
-        pass
+        raise exceptions.MethodNotAllowed('CREATE')
 
     def destroy(self, request, pk=None):
         # disable this function
-        pass
+        raise exceptions.MethodNotAllowed('DESTROY')
 
+    # move this inside data unit (that should be subclass of JOB)
+    @action()
+    def update_dataunit(self, request, pk=None):
+        job = get_object_or_404(Job, pk=pk, app=self.request.app)
+        input = self.request.DATA
+        units_id = []
+        # it expect an array
+        for d in input:
+            du = DataUnit.objects.create(job=job, input_data=json.dumps(d))
+            units_id.append(du.pk)
+        # TODO: check if it converst units to array in json.
+        return Response(units_id, status=status.HTTP_201_CREATED)
 
 
 router = routers.SimpleRouter()
