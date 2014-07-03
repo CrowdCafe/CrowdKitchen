@@ -2,7 +2,7 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from kitchen.models import Job
+from kitchen.models import Job, Unit
 from account.models import Profile, Account
 
 
@@ -48,3 +48,10 @@ class Appserializer(serializers.ModelSerializer):
     class Meta:
         model = Account
         fields = ('title', 'account', 'creator', 'title')
+
+class UnitSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Unit
+        fields=('input_data','status')
+        read_only_fields = ('status',)

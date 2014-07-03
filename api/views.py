@@ -8,10 +8,11 @@ from rest_framework.response import Response
 from rest_framework import routers, viewsets, status
 from rest_framework import exceptions
 
-from api.serializers import JobSerializer, Appserializer
+from api.serializers import JobSerializer, Appserializer, UnitSerializer
 from kitchen.models import Job, App, Unit
 from serializers import UserSerializer
 
+from rest_framework_nested import routers
 
 log = logging.getLogger(__name__)
 
@@ -84,22 +85,36 @@ class JobsViewSet(viewsets.ModelViewSet):
         # disable this function
         raise exceptions.MethodNotAllowed('DESTROY')
 
-    # move this inside data unit (that should be subclass of JOB)
-    @action()
-    def update_unit(self, request, pk=None):
-        job = get_object_or_404(Job, pk=pk, app=self.request.app)
-        input = self.request.DATA
+
+class UnitViewSet(viewsets.ModelViewSet):
+    serializer_class = UnitSerializer
+    model = Unit
+    paginate_by = 10
+
+
+    def create(self,request,job_pk):
+        job = get_object_or_404(Job, pk=job_pk, app=request.app)
+        input = request.DATA
         units_id = []
         # it expect an array
-        for d in input:
-            du = Unit.objects.create(job=job, input_data=json.dumps(d))
+        if isinstance(input,list):
+            for d in input:
+                du = Unit.objects.create(job=job, input_data=json.dumps(d))
+                units_id.append(du.pk)
+        else:
+            du = Unit.objects.create(job=job, input_data=json.dumps(input))
             units_id.append(du.pk)
-        # TODO: check if it converst units to array in json.
         return Response(units_id, status=status.HTTP_201_CREATED)
 
+    def destroy(self, request, pk=None):
+        # disable this function
+        raise exceptions.MethodNotAllowed('DESTROY')
+
+    def update(self, request, *args, **kwargs):
+        raise exceptions.MethodNotAllowed('UPDATE')
 
 router = routers.SimpleRouter()
 router.register(r'app', AppViewSet)
-router.register(r'jobs', JobsViewSet)
-#account_router = routers.NestedSimpleRouter(router, r'account', lookup='account')
-#account_router.register(r'user', UserView)
+router.register(r'job', JobsViewSet)
+job_router = routers.NestedSimpleRouter(router, r'job', lookup='job')
+job_router.register(r'unit', UnitViewSet)
