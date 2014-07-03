@@ -107,10 +107,10 @@ class JobTests(APITestCase):
 
     def test_list(self):
         Job.objects.create(app=self.app, creator=self.user, title='job title 1',
-                           description='job desc', category='CF', dataunits_per_page='2', device_type='AD',
+                           description='job desc', category='CF', units_per_page='2', device_type='AD',
                            webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
         Job.objects.create(app=self.app, creator=self.user, title='job title 2',
-                           description='job desc', category='CF', dataunits_per_page='2', device_type='AD',
+                           description='job desc', category='CF', units_per_page='2', device_type='AD',
                            webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
         url = reverse('job-list')
         response = self.client.get(url)
@@ -121,7 +121,7 @@ class JobTests(APITestCase):
     def test_detail(self):
         # create a job to test
         Job.objects.create(app=self.app, creator=self.user, title='job title 2',
-                           description='job desc', category='CF', dataunits_per_page='2', device_type='AD',
+                           description='job desc', category='CF', units_per_page='2', device_type='AD',
                            webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
         url = reverse('job-detail', kwargs={'pk': 1})
         response = self.client.get(url, format='json')

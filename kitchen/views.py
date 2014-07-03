@@ -1,11 +1,10 @@
-# TODO - needs to be rewritten
 from django.shortcuts import get_object_or_404, render_to_response, redirect, HttpResponseRedirect
 from django.http import HttpResponse
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.contrib.auth.decorators import login_required
 from django.template import RequestContext
 
-from models import App, Job, DataUnit, Answer
+from models import App, Job, Unit, Judgement
 from account.models import Account
 
 from social_auth.models import UserSocialAuth
@@ -102,7 +101,7 @@ class JobCreateView(CreateView):
 		log.debug("saved")
 		job = form.save()
 		job.save()
-		unitJob(initJob)
+		initJob(job)
 
 		return redirect(reverse('job-list', kwargs={'app_pk': job.app.id}))
 
@@ -119,7 +118,7 @@ class JobUpdateView(UpdateView):
 	def form_valid(self, form):
 		log.debug("updated")
 		job = form.save()
-		unitJob(initJob)
+		initJob(job)
 		return redirect(reverse('job-list', kwargs={'app_pk': job.app.id}))
 
 class JobListView(ListView):

@@ -10,13 +10,13 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 class UserCreateForm(UserCreationForm):
 
     email = forms.EmailField(label=(u'Email'))
-    first_name = forms.CharField(label=(u'First name'))
-    last_name = forms.CharField(label=(u'Last name'))
+    #first_name = forms.CharField(label=(u'First name'))
+    #last_name = forms.CharField(label=(u'Last name'))
     
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
-        self.helper.layout = Layout(Fieldset('Registration', 'username', 'email', 'first_name','last_name','password1','password2'))
+        self.helper.layout = Layout(Fieldset('Registration', 'email','password1','password2'))
         self.helper.add_input(Submit('submit', 'Register'))
         self.helper.form_class = 'form-vertical'
         super(UserCreateForm, self).__init__(*args, **kwargs)
@@ -29,7 +29,7 @@ class LoginForm(AuthenticationForm):
         self.helper.form_class = 'form-vertical'
         self.helper.layout = Layout(
             Fieldset(
-            'Login to CrowdCafe',
+            'Login',
             'username',
             'password',
             HTML("""
@@ -37,25 +37,51 @@ class LoginForm(AuthenticationForm):
                   <div class="col-sm-2">
                     <input type = 'submit' value='Login' class='btn-block btn btn-primary'>
                     </div>
-                    <div class="col-sm-1 center">
+                    <div class="col-sm-2 center">
                     <p>or</p>
                     </div>
-                 <div class="col-sm-3">
+                    <div class="col-sm-2">
                     <a href="{% url 'socialauth_begin' 'facebook' %}" class="btn-block btn btn-facebook-inversed"><i class="fa fa-facebook"></i> Facebook </a>
                     </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                     <a href="{% url 'socialauth_begin' 'google-oauth2' %}" class="btn-block btn btn-googleplus-inversed"><i class="fa fa-google-plus"></i> Google+ </a>
                                         </div>
-                    <div class="col-sm-3">
+                    <div class="col-sm-2">
                     <a href="{% url 'socialauth_begin' 'github' %}" class="btn-block btn btn-github-inversed"><i class="fa fa-github"></i> Github </a>
+                    </div>
+                    <div class="col-sm-2">
+                    <a href="{% url 'register' %}" class="btn-block btn btn-default"> Register </a>
                     </div>
                 </div>
                 """),
             )
         )
-
         #self.helper.add_input(Submit('submit', 'Login'))
         super(LoginForm, self).__init__(*args, **kwargs)
+
+class UserUpdate(ModelForm):
+    username = forms.CharField(required=True)
+    email = forms.EmailField(required=True)
+    first_name = forms.CharField(required=False)
+    last_name = forms.CharField(required=False)
+
+    class Meta:
+        model = User
+        fields = ('username','email', 'first_name', 'last_name')
+
+    def clean_email(self):
+        username = self.cleaned_data.get('username')
+        email = self.cleaned_data.get('email')
+
+        if email and User.objects.filter(email=email).exclude(pk=self.request.id).count():
+            raise forms.ValidationError('This email address is already in use. Please supply a different email address.')
+        return email
+    def __init__(self, *args, **kwargs):
+        self.helper = FormHelper()
+        self.helper.form_method = 'post'
+        self.helper.add_input(Submit('submit', 'Update'))
+        self.helper.form_class = 'form-vertical'
+        super(UserUpdate, self).__init__(*args, **kwargs)
 
 class AccountForm(ModelForm):
     

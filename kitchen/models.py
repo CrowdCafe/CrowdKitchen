@@ -19,12 +19,16 @@ from django.db.models import Sum
 import requests
 from rest_framework.authtoken.models import Token
 
-from CrowdKitchen.settings_common import TASK_CATEGORIES
+from CrowdKitchen.settings import TASK_CATEGORIES
+
 from account.models import Account, FundTransfer
 
-
-CATEGORY_CHOICES = (('CF', 'Espresso'), ('CP', 'Cappuccino'), ('WN',
-                                                               'Wine'))  #TODO need to bring this touples and dictionary in settings_common TASK_CATEGORIES to something in common
+#TODO - Need to find a way to combine this and TASK_CATEGORIES from settings.
+TASK_CATEGORY_CHOICES = (
+    ('EP','Espresso',),
+    ('CP','Cappuccino'),
+    ('WN','Wine'),  
+    )
 
 DEVICE_CHOISES = (('MO', 'Mobile only'), ('DO', 'Desktop only'), ('AD', 'Any device'))
 
@@ -58,20 +62,19 @@ class Job(models.Model):
     creator = models.ForeignKey(User)  # the one created the job
     title = models.CharField(max_length=255, default='New job')
     description = models.TextField()
-    category = models.CharField(max_length=2, default='CF', choices=CATEGORY_CHOICES, blank=True)
-    # reward given to a worker per data_unit #ASK - is this name appropriate? wage/rate/cost/reward?
-    #TODO: change this
-    price = models.FloatField()
+    category = models.CharField(max_length=2, choices=TASK_CATEGORY_CHOICES)
+
+    price = models.DecimalField(max_digits=8, decimal_places=2, default=0.03) # reward worker gets per unit
     status = models.CharField(max_length=2, choices=JOB_STATUS_CHOISES, default='NP')
 
-    dataunits_per_page = models.IntegerField(default=5)
+    units_per_page = models.IntegerField(default=5)
     device_type = models.CharField(max_length=2, choices=DEVICE_CHOISES, default='AD')
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
     #other
-    webhook_url = models.URLField(null=True, blank=True)
+    judgements_webhook_url = models.URLField(null=True, blank=True) # every time a worker submits judgements, POST is sent on this url with judgements data
 
     #userinterface
-    userinterface_url = models.URLField(null=True, blank=True)
+    userinterface_url = models.URLField(null=True, blank=True) # if this is filled - html is taken from here to set userinterface_html
     userinterface_html = models.TextField(null=True, blank=True)
     #make sure we do not have anly volnurabilities in userinterface_html
     deleted = models.DateTimeField(blank=True, null=True)
@@ -93,16 +96,15 @@ class Job(models.Model):
             self.price = TASK_CATEGORIES[self.category]['cost']
         super(Job, self).save(*args, **kwargs)
 
-
+#ASK QualityControl is an action, may be call it QualitySetting?
 class QualityControl(models.Model):
     job = models.OneToOneField(Job)
-    min_answers_per_dataunit = models.IntegerField(default=1)
-    max_dataunits_per_worker = models.IntegerField(
-        default=100)  # Some limitation of amount of dataunits single worker can complete
+    min_judgements_per_unit = models.IntegerField(default=1)
+    max_units_per_worker = models.IntegerField(
+        default=100)  # Some limitation of amount of units single worker can complete
 
     def __unicode__(self):
         return str(self.id)
-
 
 class GoldQualityControl(QualityControl):
     gold_min = models.IntegerField(default=0, null=True)
@@ -113,36 +115,28 @@ class GoldQualityControl(QualityControl):
     def __unicode__(self):
         return str(self.id)
 
+UNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'))
 
-DATAUNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'))
-
-
-class DataUnit(models.Model):
+class Unit(models.Model):
     job = models.ForeignKey(Job)
     input_data = jsonfield.JSONField()
-    status = models.CharField(max_length=2, choices=DATAUNIT_STATUS_CHOISES, default='NC')
+    status = models.CharField(max_length=2, choices=UNIT_STATUS_CHOISES, default='NC')
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
     deleted = models.DateTimeField(blank=True, null=True)
 
     def __unicode__(self):
         return str(self.id)
 
+# JUDGEMENT RELATED CLASSES
 
-class GoldDataUnit(DataUnit):
-    expected_data = jsonfield.JSONField()
-
-    def __unicode__(self):
-        return str(self.id)
-
-
-# ANSWERS RELATED CLASSES
-
-class Answer(models.Model):
-    dataunit = models.ForeignKey(DataUnit, blank=True)
+class Judgement(models.Model):
+    unit = models.ForeignKey(Unit, blank=True)
     output_data = jsonfield.JSONField(blank=True)
     score = models.FloatField(default=0.0, null=True, blank=True)
     worker = models.ForeignKey(User, blank=True)
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
+    # Don't see a reason to have extra class for GoldJudgements, as we won't have any extra fields in it
+    gold = models.BooleanField(default = False) 
 
     def __unicode__(self):
         return str(self.id)

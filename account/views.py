@@ -7,7 +7,7 @@ from django.contrib.auth import logout, authenticate, login
 import logging
 from django.contrib.auth.models import User
 from django.core.context_processors import csrf 
-from forms import LoginForm, UserCreateForm, AccountForm, MembershipForm
+from forms import LoginForm, UserCreateForm, AccountForm, MembershipForm, UserUpdate
 from models import Account, Profile, Membership
 from django.views.generic.edit import CreateView, UpdateView
 from django.shortcuts import render
@@ -43,14 +43,11 @@ def register_user(request):
             user = authenticate(username=username,
                                 password=password)
             if user:
-                # save extra parameters - email, first name, last name
+                # save extra parameters - email
                 user.email = user_form.data['email']
-                user.first_name = user_form.data['first_name']
-                user.last_name = user_form.data['last_name']
                 user.save()
-
+                #ASK - may be we should init it only in one place - on login?
                 initUser(user)
-
                 login(request, user)
                 return redirect('account-list')
         return render(request,
@@ -61,6 +58,21 @@ def register_user(request):
     args['form'] = UserCreateForm()
     print args
     return render(request, template_name, args)
+
+def update_user(request):
+    args = {}
+    template_name = 'kitchen/crispy.html'
+
+    if request.method == 'POST':
+        form = UserUpdate(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            return redirect('account-list')
+    else:
+        form = UserUpdate(instance=request.user)
+
+    args['form'] = form
+    return render_to_response(template_name, {'form': form}, context_instance=RequestContext(request))
 
 def logout_user(request):
     
@@ -77,6 +89,7 @@ def login_user(request):
         print user
         if user is not None:
             login(request, user)
+            initUser(user)
             #token = Token.objects.get_or_create(user=user)
             return redirect('account-list')
     form = LoginForm()
@@ -115,8 +128,8 @@ class AccountCreateView(CreateView):
     def form_valid(self, form):
         log.debug("saved")
         account = form.save()
-        account.users.add(self.request.user)
         account.save()
+        membership, created = Membership.objects.get_or_create(user = self.request.user, permission = 'AN', account = account)
 
         return redirect(reverse('account-list'))
 

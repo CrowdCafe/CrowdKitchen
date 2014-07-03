@@ -16,6 +16,7 @@
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">{{user.username}} <b class="caret"></b></a>
 					<ul class="dropdown-menu">
 						<li><a href="/">Home</a></li>
+						<li><a href="{% url 'user-update' %}">Profile</a></li>
 						<li class="divider"></li>
 						<li><a href="{% url 'logout'%}">Logout</a></li>
 					</ul>
@@ -23,9 +24,6 @@
 				{% else %}
 				<li>
 					<a href="{% url 'login'%}" >Login</a>
-				</li>
-				<li>
-					<a href="{% url 'register'%}" >Register</a>
 				</li>
 				{% endif %}
 			</ul>

@@ -6,8 +6,6 @@ from django.dispatch.dispatcher import receiver
 from rest_framework.authtoken.models import Token
 from social_auth.models import UserSocialAuth
 
-
-
 # Extension of User class to add some properties (does not have any columns)
 class Profile(models.Model):
     user = models.OneToOneField(User)
@@ -29,14 +27,15 @@ class Profile(models.Model):
 
     @property
     def avatar(self):
+        #TODO - to fix it, as avatars.io works only with Twitter, Facebook, Instagram
         if len(self.connectedSocialNetworks) > 0:
             return "http://avatars.io/" + self.connectedSocialNetworks.reverse()[0].provider + "/" + str(
                 self.connectedSocialNetworks.reverse()[0].uid) + "?size=medium"
         else:
             return 'http://www.gravatar.com/' + hashlib.md5(self.user.email.lower()).hexdigest()
 
-            # Class for grouping several users to one billing account. Can be useful - if there is an organization, or a research team, which consists of 3 people working together.
-
+            
+# Class for grouping several users to one billing account. Can be useful - if there is an organization, or a research team, which consists of 3 people working together.
 
 class Account(models.Model):
     users = models.ManyToManyField(User, through='Membership')
@@ -44,10 +43,8 @@ class Account(models.Model):
     personal = models.BooleanField(default=False)
     creator = models.ForeignKey(User, related_name='Creator')
     #sum of all fundtransfer amounts, where to_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
-    total_earnings = models.DecimalField(max_digits=8, decimal_places=2,
-                                         default=0.00)
-    total_spendings = models.DecimalField(max_digits=8, decimal_places=2,
-                                          default=0.00)
+    total_earnings = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
+    total_spendings = models.DecimalField(max_digits=8, decimal_places=2, default=0.00)
     #sum of all fundtransfer amounts, where from_account = self (we keep it as a column to do less calls to aggregation of FundTransfer table)
     deleted = models.DateTimeField(blank=True, null=True)
     # 'earnings', 'spendings'
@@ -78,16 +75,17 @@ class Membership(models.Model):
 
 
 CURRENCY_TYPE = (('RM', 'Real Money'), ('VM', 'Virtual Money'))
+
 # when a worker earns money - they go from requestor to a worker
 # when a worker/requestor wants to send money to another user - they do it via fundtransfer
+
 class FundTransfer(models.Model):
     from_account = models.ForeignKey(Account, related_name='from_account', blank=True, null=True)
     to_account = models.ForeignKey(Account, related_name='to_account', blank=True, null=True)
     currency = models.CharField(max_length=2, choices=CURRENCY_TYPE)
     amount = models.DecimalField(max_digits=8, decimal_places=2)
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
-    description = models.CharField(max_length=1000,
-                                   blank=True)  # when we generate transfers we might add here a description - what this transfer is for.
+    description = models.CharField(max_length=1000, blank=True)  # when we generate transfers we might add here a description - what this transfer is for.
 
 
 # create token for each user that is stored.
