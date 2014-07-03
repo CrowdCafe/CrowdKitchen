@@ -20,7 +20,7 @@
 			<td>id:{{job.id}}</td>
 			<td>{{job.title}}</td>
 			<td>{{job.price}} euro</td>
-			<td><a href="#">data</a></td>
+			<td><a href="{% url 'unit-list' job.id %}">data</a></td>
 			<td><a href="{% url 'job-update' job.id %}" class='btn btn-default'>edit</a></td>
 		</div>
 	</tr>

@@ -6,6 +6,7 @@ admin.autodiscover()
 
 urlpatterns = patterns('',
 	url(r'api/', include('api.urls')),
+	url(r'utility/', include('utility.urls')),
 	url(r'', include('social_auth.urls')),
 
     #url(r'api/', include('api.urls')),
