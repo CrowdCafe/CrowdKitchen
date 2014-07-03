@@ -16,7 +16,9 @@ urlpatterns = patterns('',
     #url(r'^auth/$',views.auth,name='auth'),
     url(r'^$',views.home),
 
+    #TODO - we need to find a consistent way to call functions and classes
     url(r'^user/login/$',views.login_user,name='login'),
+    url(r'^user/update/$',views.update_user,name='user-update'),
     url(r'^user/register/$', views.register_user, name='register'),
     url(r'^user/logout/$', views.logout_user, name='logout'),
     

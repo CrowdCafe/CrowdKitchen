@@ -1,4 +1,4 @@
-from models import App, Job, QualityControl, DataUnit
+from models import App, Job, QualityControl, Unit
 
 def initJob(job):
 	

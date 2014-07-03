@@ -1,6 +1,6 @@
 from django import forms
 from datetime import date, timedelta
-from models import App, Job, DataUnit, Answer
+from models import App, Job
 from account.models import Account
 
 from models import JOB_STATUS_CHOISES
