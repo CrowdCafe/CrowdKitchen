@@ -9,7 +9,7 @@ from rest_framework import routers, viewsets, status
 from rest_framework import exceptions
 
 from api.serializers import JobSerializer, Appserializer
-from kitchen.models import Job, App, DataUnit
+from kitchen.models import Job, App, Unit
 from serializers import UserSerializer
 
 
@@ -86,13 +86,13 @@ class JobsViewSet(viewsets.ModelViewSet):
 
     # move this inside data unit (that should be subclass of JOB)
     @action()
-    def update_dataunit(self, request, pk=None):
+    def update_unit(self, request, pk=None):
         job = get_object_or_404(Job, pk=pk, app=self.request.app)
         input = self.request.DATA
         units_id = []
         # it expect an array
         for d in input:
-            du = DataUnit.objects.create(job=job, input_data=json.dumps(d))
+            du = Unit.objects.create(job=job, input_data=json.dumps(d))
             units_id.append(du.pk)
         # TODO: check if it converst units to array in json.
         return Response(units_id, status=status.HTTP_201_CREATED)

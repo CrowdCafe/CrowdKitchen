@@ -108,10 +108,10 @@ class JobTests(APITestCase):
     def test_list(self):
         Job.objects.create(app=self.app, creator=self.user, title='job title 1',
                            description='job desc', category='CF', units_per_page='2', device_type='AD',
-                           webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
+                           judgements_webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
         Job.objects.create(app=self.app, creator=self.user, title='job title 2',
                            description='job desc', category='CF', units_per_page='2', device_type='AD',
-                           webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
+                           judgements_webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
         url = reverse('job-list')
         response = self.client.get(url)
         # check if the list has 1 element
@@ -122,7 +122,7 @@ class JobTests(APITestCase):
         # create a job to test
         Job.objects.create(app=self.app, creator=self.user, title='job title 2',
                            description='job desc', category='CF', units_per_page='2', device_type='AD',
-                           webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
+                           judgements_webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
         url = reverse('job-detail', kwargs={'pk': 1})
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -168,11 +168,11 @@ class JobTests(APITestCase):
 
     def test_add_data_unit(self):
         Job.objects.create(app=self.app, creator=self.user, title='job title 2',
-                           description='job desc', category='CF', dataunits_per_page='2', device_type='AD',
-                           webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
+                           description='job desc', category='CF', units_per_page='2', device_type='AD',
+                           judgements_webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
 
         # add to a create Job: 201
-        url = reverse('job-update-dataunit', kwargs={'pk': 1})
+        url = reverse('job-update-unit', kwargs={'pk': 1})
         # first element is an array
         data =  [[{'title':1},{'test':'as'}],{'title':2},{'title':3}]
         response = self.client.post(url, data=data,format='json')
@@ -180,7 +180,7 @@ class JobTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
         # add to an unexisting Job: 404
-        url = reverse('job-update-dataunit', kwargs={'pk': 2})
+        url = reverse('job-update-unit', kwargs={'pk': 2})
         data =  [[{'title':1},{'test':'as'}],{'title':2},{'title':3}]
         response = self.client.post(url, data=data,format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
@@ -193,7 +193,7 @@ class JobTests(APITestCase):
         token = Token.objects.get(user=user)
         token = 'Token ' + token.key + '/' + self.app.token
         client.credentials(HTTP_AUTHORIZATION=token)
-        url = reverse('job-update-dataunit', kwargs={'pk': 1})
+        url = reverse('job-update-unit', kwargs={'pk': 1})
         data =  [[{'title':1},{'test':'as'}],{'title':2},{'title':3}]
         response = client.post(url, data=data,format='json')
         self.assertEqual(len(response.data),3)
@@ -207,7 +207,7 @@ class JobTests(APITestCase):
         app = App.objects.create(account=account, creator=user, title='test4')
         token = 'Token ' + token.key + '/' + app.token
         client.credentials(HTTP_AUTHORIZATION=token)
-        url = reverse('job-update-dataunit', kwargs={'pk': 1})
+        url = reverse('job-update-unit', kwargs={'pk': 1})
         data =  [[{'title':1},{'test':'as'}],{'title':2},{'title':3}]
         response = client.post(url, data=data,format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
