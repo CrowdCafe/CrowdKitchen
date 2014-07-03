@@ -22,7 +22,6 @@ class UserCreateForm(UserCreationForm):
         super(UserCreateForm, self).__init__(*args, **kwargs)
 
 class LoginForm(AuthenticationForm):
-    
     def __init__(self, *args, **kwargs):
         self.helper = FormHelper()
         self.helper.form_method = 'post'
@@ -34,12 +33,19 @@ class LoginForm(AuthenticationForm):
             'password',
             HTML("""
                  <div class="row">
-                  <div class="col-sm-2">
+                    <div class="col-sm-2">
                     <input type = 'submit' value='Login' class='btn-block btn btn-primary'>
                     </div>
-                    <div class="col-sm-2 center">
-                    <p>or</p>
+                    <div class="col-sm-4">
+                    <a href="{% url 'register' %}" class="">Don't have an account? Register</a>
                     </div>
+                 </div>
+                 <div class="row">
+                  <div class="col-sm-2">
+                 <p>or login with:</p>
+                 </div>
+                 </div>
+                 <div class="row">
                     <div class="col-sm-2">
                     <a href="{% url 'socialauth_begin' 'facebook' %}" class="btn-block btn btn-facebook-inversed"><i class="fa fa-facebook"></i> Facebook </a>
                     </div>
@@ -50,9 +56,10 @@ class LoginForm(AuthenticationForm):
                     <a href="{% url 'socialauth_begin' 'github' %}" class="btn-block btn btn-github-inversed"><i class="fa fa-github"></i> Github </a>
                     </div>
                     <div class="col-sm-2">
-                    <a href="{% url 'register' %}" class="btn-block btn btn-default"> Register </a>
+                      <a href="{% url 'socialauth_begin' 'dropbox' %}" class="btn-block btn btn-dropbox-inversed"><i class="fa fa-dropbox"></i> Dropbox </a>
                     </div>
-                </div>
+                    
+             </div>
                 """),
             )
         )

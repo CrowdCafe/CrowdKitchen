@@ -17,10 +17,9 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db.models import Sum
 import requests
+
 from rest_framework.authtoken.models import Token
-
 from CrowdKitchen.settings import TASK_CATEGORIES
-
 from account.models import Account, FundTransfer
 
 #TODO - Need to find a way to combine this and TASK_CATEGORIES from settings.
@@ -57,28 +56,31 @@ JOB_STATUS_CHOISES = (('NP', 'Not published'), ('PB', 'Published'))
 
 
 class Job(models.Model):
-    #general
+    # general
     app = models.ForeignKey(App)
     creator = models.ForeignKey(User)  # the one created the job
     title = models.CharField(max_length=255, default='New job')
     description = models.TextField()
     category = models.CharField(max_length=2, choices=TASK_CATEGORY_CHOICES)
 
+    # settings
     price = models.DecimalField(max_digits=8, decimal_places=2, default=0.03) # reward worker gets per unit
-    status = models.CharField(max_length=2, choices=JOB_STATUS_CHOISES, default='NP')
-
     units_per_page = models.IntegerField(default=5)
     device_type = models.CharField(max_length=2, choices=DEVICE_CHOISES, default='AD')
-    date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
-    #other
+    
+    # api+notification
     judgements_webhook_url = models.URLField(null=True, blank=True) # every time a worker submits judgements, POST is sent on this url with judgements data
 
-    #userinterface
+    # userinterface
     userinterface_url = models.URLField(null=True, blank=True) # if this is filled - html is taken from here to set userinterface_html
     userinterface_html = models.TextField(null=True, blank=True)
-    #make sure we do not have anly volnurabilities in userinterface_html
+    # make sure we do not have anly volnurabilities in userinterface_html
+    
+    # other
+    status = models.CharField(max_length=2, choices=JOB_STATUS_CHOISES, default='NP')
     deleted = models.DateTimeField(blank=True, null=True)
-
+    date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
+    
     def __unicode__(self):
         return str(self.id)
 
@@ -96,6 +98,8 @@ class Job(models.Model):
             self.price = TASK_CATEGORIES[self.category]['cost']
         super(Job, self).save(*args, **kwargs)
 
+# ====================================================
+#ASK - the next two classes QialityControl and GoldQualityControl do not seem to be elegant
 #ASK QualityControl is an action, may be call it QualitySetting?
 class QualityControl(models.Model):
     job = models.OneToOneField(Job)
@@ -114,6 +118,8 @@ class GoldQualityControl(QualityControl):
 
     def __unicode__(self):
         return str(self.id)
+# ====================================================
+# JOB DATA UNITS RELATED CLASSES
 
 UNIT_STATUS_CHOISES = (('NC', 'Not completed'), ('CD', 'Completed'))
 
@@ -123,6 +129,7 @@ class Unit(models.Model):
     status = models.CharField(max_length=2, choices=UNIT_STATUS_CHOISES, default='NC')
     date_created = models.DateTimeField(auto_now_add=True, auto_now=False)
     deleted = models.DateTimeField(blank=True, null=True)
+    published = models.BooleanField(default = False) 
 
     def __unicode__(self):
         return str(self.id)

@@ -196,6 +196,7 @@ INSTALLED_APPS = (
     'requests',
     'djangobower',
     'djrill',
+    'utility',
     #'south',
     # Uncomment the next line to enable the admin:
     'django.contrib.admin',
@@ -245,6 +246,8 @@ AUTHENTICATION_BACKENDS = (
 #    'social_auth.backends.contrib.orkut.OrkutBackend',
 #    'social_auth.backends.contrib.foursquare.FoursquareBackend',
     'social_auth.backends.contrib.github.GithubBackend',
+    'social_auth.backends.contrib.github.GithubBackend',
+    'social_auth.backends.contrib.dropbox.DropboxBackend',
 #    'social_auth.backends.contrib.vkontakte.VKontakteBackend',
 #    'social_auth.backends.contrib.live.LiveBackend',
 #    'social_auth.backends.contrib.skyrock.SkyrockBackend',
@@ -253,7 +256,7 @@ AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
 )
 
-SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter','facebook','github','google-oauth2')
+SOCIAL_AUTH_ENABLED_BACKENDS = ('twitter','facebook','github','google-oauth2','dropbox')
 
 SOCIAL_AUTH_PIPELINE = (
     'social_auth.backends.pipeline.social.social_auth_user',
