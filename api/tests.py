@@ -106,10 +106,15 @@ class JobTests(APITestCase):
         token = 'Token ' + token.key + '/' + self.app.token
         self.client.credentials(HTTP_AUTHORIZATION=token)
 
+        self.user2 = User.objects.create(username='usernew', password='test3', email="test@test.com")
+        self.account2 = Account.objects.create(title='accountnew', creator=self.user2)
+        Membership.objects.create(user=self.user2, account=self.account2)
+        self.app2= App.objects.create(account=self.account2, creator=self.user2, title='appnew')
+
         self.job1=Job.objects.create(app=self.app, creator=self.user, title='job title 1',
                            description='job desc', category='CF', units_per_page='2', device_type='AD',
                            judgements_webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
-        self.job2=Job.objects.create(app=self.app, creator=self.user, title='job title 2',
+        self.job2=Job.objects.create(app=self.app2, creator=self.user2, title='job title 2',
                            description='job desc', category='CF', units_per_page='2', device_type='AD',
                            judgements_webhook_url='http://example.com', userinterface_url="http://example.com/ui/")
 
@@ -119,14 +124,14 @@ class JobTests(APITestCase):
         response = self.client.get(url)
         # check if the list has 1 element
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertGreater(len(response.data),0)
+        self.assertEqual(response.data['count'],1)
 
     def test_detail(self):
 
-        url = reverse('api-job-detail', kwargs={'pk': self.job2})
+        url = reverse('api-job-detail', kwargs={'pk': self.job1})
         response = self.client.get(url, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data['title'], 'job title 2')
+        self.assertEqual(response.data['title'], 'job title 1')
 
         # unexisting or of someone else: 404
         url = reverse('api-job-detail', kwargs={'pk':  0})
@@ -148,15 +153,14 @@ class JobTests(APITestCase):
 
 
         # another user, another app: 404
-        user = User.objects.create(username='usernew', password='test3', email="test@test.com")
-        account = Account.objects.create(title='accountnew', creator=user)
-        Membership.objects.create(user=user, account=account)
-        token = Token.objects.get(user=user)
-        app = App.objects.create(account=account, creator=user, title='appnew')
-        token = 'Token ' + token.key + '/' + app.token
+
+        token = Token.objects.get(user=self.user2)
+
+        token = 'Token ' + token.key + '/' + self.app2.token
         client.credentials(HTTP_AUTHORIZATION=token)
         response = client.get(url, format='json')
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        # this is not 403 beacuse the list is restricted by the app (see get_queryset)
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     def test_create(self):
         # create not allowed : 405
@@ -201,6 +205,7 @@ class UnitTest(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         # they are paginated
         # check the data of the first
+        self.assertEqual(response.data['count'],3)
         self.assertEqual(response.data['results'][0]['input_data'],[{'title':1},{'test':'as'}])
 
         # add to an unexisting Job: 404
@@ -230,10 +235,10 @@ class UnitTest(APITestCase):
         app = App.objects.create(account=account, creator=user, title='test4')
         token = 'Token ' + token.key + '/' + app.token
         client.credentials(HTTP_AUTHORIZATION=token)
-
         url = reverse('api-unit-list', kwargs={'job_pk': 1})
         response = client.get(url,format='json')
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
         data =  [[{'title':1},{'test':'as'}],{'title':2},{'title':3}]
         response = client.post(url, data=data,format='json')
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)

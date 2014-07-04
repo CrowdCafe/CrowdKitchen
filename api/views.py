@@ -75,11 +75,13 @@ class JobsViewSet(viewsets.ModelViewSet):
     model = Job
     paginate_by = 10
 
+
+
     # this should not be needed, it's handled by the permission
-    # def get_queryset(self):
-    #     #  the job of the user with the requested app
-    #     # ASK: filtering only by app?
-    #     return Job.objects.filter(app=self.request.app)
+    def get_queryset(self):
+        #  the job of the user with the requested app
+        # ASK: filtering only by app?
+        return Job.objects.filter(app=self.request.app)
 
     def create(self, request):
         # disable this function
@@ -101,8 +103,8 @@ class UnitViewSet(viewsets.ModelViewSet):
     paginate_by = 10
 
     def get_queryset(self):
-        # filter by job
-        # ASK: do we need any control?
+        # we don't need any other control beacuse this is nested
+        # so permission checks if app owns the job
         list = Unit.objects.filter(job=self.kwargs['job_pk'])
         return list
 

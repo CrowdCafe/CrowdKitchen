@@ -354,12 +354,12 @@ LOGGING = {
         },
         'api.permissions': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'WARN',
             'propagate': False,
         },
         'api.authentication': {
             'handlers': ['console'],
-            'level': 'WARNING',
+            'level': 'WARN',
             'propagate': False,
         },
         'api': {
