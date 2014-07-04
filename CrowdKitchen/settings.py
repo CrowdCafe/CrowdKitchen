@@ -286,13 +286,13 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
      'DEFAULT_PERMISSION_CLASSES': [
          'rest_framework.permissions.IsAuthenticated',
-    #     'api.permissions.IsOwner'
+         # 'api.permissions.IsOwner',
      ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'TEST_REQUEST_RENDERER_CLASSES': (
-        'rest_framework.renderers.MultiPartRenderer',
+        # 'rest_framework.renderers.MultiPartRenderer',
         'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.YAMLRenderer'
+        # 'rest_framework.renderers.YAMLRenderer'
     )
 }
 

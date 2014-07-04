@@ -2,6 +2,7 @@
 This file contains the permission rules for the api.
 
 '''
+from kitchen.models import App, Job, Unit
 
 __author__ = 'stefano'
 
@@ -24,17 +25,21 @@ class IsOwner(permissions.BasePermission):
     def has_permission(self, request, view, obj=None):
         # log.debug("check permission")
         #if it's a task instance check ownership of the task
+
         if obj is None:
-            # log.debug("obj is none")
+             return True
+        # for app instance return true
+        elif isinstance(obj,App):
+            log.debug('app')
             return True
-        elif hasattr(obj, 'task'):
-            # log.debug('is an instance')
-            # log.debug("%s %s" % (obj.task.owner, request.user))
-            return obj.task.owner == request.user and obj.task.app == request.app
-        #if it's a task check ownership
-        elif hasattr(obj, 'owner'):
-            # log.debug('is a task')
-            return obj.owner == request.user and obj.app == request.app
+        # if it's a job
+        elif isinstance(obj,Job):
+            log.debug('job %s %s %s'%(obj.app,request.app,obj.app==request.app))
+            return obj.app==request.app
+        # if it's a unit
+        elif isinstance(obj,Unit):
+            log.debug('unit %s %s %s'%(obj.job.app,request.app,obj.job.app==request.app))
+            return obj.job.app==request.app
         else:
             log.debug('is smt else')
             return False

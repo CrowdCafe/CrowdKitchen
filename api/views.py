@@ -91,20 +91,30 @@ class UnitViewSet(viewsets.ModelViewSet):
     model = Unit
     paginate_by = 10
 
+    # def list(self, request, *args, **kwargs):
+    #     return Unit.objects.filter(job=self.kwargs['job_pk'])
+    # def get_queryset(self):
+    #     # filter by job
+    #     # ASK: do we need any control?
+    #     print 'qs'
+    #     log.debug(self.kwargs['job_pk'])
+    #     list = Unit.objects.filter(job=self.kwargs['job_pk'])
+    #     log.debug('list %s',list)
+    #     return list
 
     def create(self,request,job_pk):
+        log.debug("create")
         job = get_object_or_404(Job, pk=job_pk, app=request.app)
         input = request.DATA
+        log.debug('input')
         units_id = []
         # it expect an array
         if isinstance(input,list):
             for d in input:
                 du = Unit.objects.create(job=job, input_data=json.dumps(d))
-                units_id.append(du.pk)
         else:
             du = Unit.objects.create(job=job, input_data=json.dumps(input))
-            units_id.append(du.pk)
-        return Response(units_id, status=status.HTTP_201_CREATED)
+        return Response(status=status.HTTP_201_CREATED)
 
     def destroy(self, request, pk=None):
         # disable this function
