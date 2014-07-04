@@ -33,6 +33,7 @@ class AccountSerializer(serializers.ModelSerializer):
 
 
 class JobSerializer(serializers.ModelSerializer):
+    pk = serializers.Field()
     app = serializers.RelatedField(source='app.title', read_only=True)
     creator = serializers.RelatedField(source='creator.username', read_only=True)
 
@@ -50,8 +51,8 @@ class Appserializer(serializers.ModelSerializer):
         fields = ('title', 'account', 'creator', 'title')
 
 class UnitSerializer(serializers.ModelSerializer):
-
+    pk = serializers.Field()
     class Meta:
         model = Unit
-        fields=('input_data','status')
+        fields=('input_data','status','pk')
         read_only_fields = ('status',)

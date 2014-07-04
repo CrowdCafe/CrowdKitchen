@@ -1,4 +1,6 @@
 from __future__ import unicode_literals
+import logging
+
 __author__ = 'stefano'
 
 from rest_framework import exceptions
@@ -6,7 +8,7 @@ from rest_framework.authentication import get_authorization_header, BaseAuthenti
 from rest_framework.authtoken.models import Token
 from kitchen.models import App
 
-
+log = logging.getLogger(__name__)
 class TokenAppAuthentication(BaseAuthentication):
     """
         App token authentication, modified from TokenBase Authentication
@@ -54,6 +56,7 @@ class TokenAppAuthentication(BaseAuthentication):
             token = Token.objects.get(key=usertoken)
             # get the app
             app = self.model.objects.get(token=apptoken)
+            log.debug("%s %s %s"%(token.user.username,app.pk,app.title))
 
             # check if user is in the account of the app
             if not token.user in app.account.users.all():

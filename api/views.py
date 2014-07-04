@@ -5,8 +5,11 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.decorators import api_view, authentication_classes, action
 from rest_framework.generics import get_object_or_404
 from rest_framework.response import Response
-from rest_framework import routers, viewsets, status
+from rest_framework import routers, viewsets, status, routers
 from rest_framework import exceptions
+import api
+from api import routers
+from api.routers import ApiRouter, NestedApiRouter
 
 from api.serializers import JobSerializer, Appserializer, UnitSerializer
 from kitchen.models import Job, App, Unit
@@ -72,10 +75,11 @@ class JobsViewSet(viewsets.ModelViewSet):
     model = Job
     paginate_by = 10
 
-    def get_queryset(self):
-        #  the job of the user with the requested app
-        # ASK: filtering only by app?
-        return Job.objects.filter(app=self.request.app)
+    # this should not be needed, it's handled by the permission
+    # def get_queryset(self):
+    #     #  the job of the user with the requested app
+    #     # ASK: filtering only by app?
+    #     return Job.objects.filter(app=self.request.app)
 
     def create(self, request):
         # disable this function
@@ -85,36 +89,42 @@ class JobsViewSet(viewsets.ModelViewSet):
         # disable this function
         raise exceptions.MethodNotAllowed('DESTROY')
 
+    def update(self, request, *args, **kwargs):
+        raise exceptions.MethodNotAllowed('UPDATE')
+
+    def partial_update(self, request, pk=None):
+        raise exceptions.MethodNotAllowed('PARTIAL UPDATE')
 
 class UnitViewSet(viewsets.ModelViewSet):
     serializer_class = UnitSerializer
     model = Unit
     paginate_by = 10
 
-    # def list(self, request, *args, **kwargs):
-    #     return Unit.objects.filter(job=self.kwargs['job_pk'])
-    # def get_queryset(self):
-    #     # filter by job
-    #     # ASK: do we need any control?
-    #     print 'qs'
-    #     log.debug(self.kwargs['job_pk'])
-    #     list = Unit.objects.filter(job=self.kwargs['job_pk'])
-    #     log.debug('list %s',list)
-    #     return list
+    def get_queryset(self):
+        # filter by job
+        # ASK: do we need any control?
+        list = Unit.objects.filter(job=self.kwargs['job_pk'])
+        return list
+
+    def list(self, request, *args, **kwargs):
+        try:
+            Job.objects.get(pk=self.kwargs['job_pk'], app=request.app)
+        except:
+            raise exceptions.PermissionDenied()
+        return viewsets.ModelViewSet.list(self, request, *args, **kwargs)
+
 
     def create(self,request,job_pk):
-        log.debug("create")
         job = get_object_or_404(Job, pk=job_pk, app=request.app)
         input = request.DATA
-        log.debug('input')
-        units_id = []
         # it expect an array
         if isinstance(input,list):
             for d in input:
-                du = Unit.objects.create(job=job, input_data=json.dumps(d))
+                Unit.objects.create(job=job, input_data=json.dumps(d))
         else:
-            du = Unit.objects.create(job=job, input_data=json.dumps(input))
+            Unit.objects.create(job=job, input_data=json.dumps(input))
         return Response(status=status.HTTP_201_CREATED)
+
 
     def destroy(self, request, pk=None):
         # disable this function
@@ -123,8 +133,14 @@ class UnitViewSet(viewsets.ModelViewSet):
     def update(self, request, *args, **kwargs):
         raise exceptions.MethodNotAllowed('UPDATE')
 
-router = routers.SimpleRouter()
+
+    def partial_update(self, request, pk=None):
+        raise exceptions.MethodNotAllowed('PARTIAL UPDATE')
+
+
+
+router = ApiRouter()
 router.register(r'app', AppViewSet)
 router.register(r'job', JobsViewSet)
-job_router = routers.NestedSimpleRouter(router, r'job', lookup='job')
+job_router = NestedApiRouter(router, r'job', lookup='job')
 job_router.register(r'unit', UnitViewSet)

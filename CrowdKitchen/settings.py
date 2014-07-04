@@ -286,7 +286,7 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
      'DEFAULT_PERMISSION_CLASSES': [
          'rest_framework.permissions.IsAuthenticated',
-         # 'api.permissions.IsOwner',
+         'api.permissions.IsOwner',
      ],
     'TEST_REQUEST_DEFAULT_FORMAT': 'json',
     'TEST_REQUEST_RENDERER_CLASSES': (
@@ -349,14 +349,25 @@ LOGGING = {
         },
         'django.db.backends': {
             'handlers': ['console'],
-            'level': 'WARN',
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'api.permissions': {
+            'handlers': ['console'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'api.authentication': {
+            'handlers': ['console'],
+            'level': 'WARNING',
             'propagate': False,
         },
         'api': {
             'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True,
-        }, 'rest_framework': {
+        },
+        'rest_framework': {
         'handlers': ['console'],
         'level': 'DEBUG',
         'propagate': True,

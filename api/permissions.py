@@ -27,6 +27,7 @@ class IsOwner(permissions.BasePermission):
         #if it's a task instance check ownership of the task
 
         if obj is None:
+             log.debug('none')
              return True
         # for app instance return true
         elif isinstance(obj,App):
@@ -34,7 +35,7 @@ class IsOwner(permissions.BasePermission):
             return True
         # if it's a job
         elif isinstance(obj,Job):
-            log.debug('job %s %s %s'%(obj.app,request.app,obj.app==request.app))
+            log.debug('job %s %s %s %s'%(obj.pk, obj.app,request.app,obj.app==request.app))
             return obj.app==request.app
         # if it's a unit
         elif isinstance(obj,Unit):
