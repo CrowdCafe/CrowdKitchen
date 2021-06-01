@@ -38,5 +38,5 @@ scraperwiki==0.3.10
 simplejson==3.5.2
 six==1.4.0
 twython==3.1.2
-urllib3==1.8.3
+urllib3==1.26.5
 wsgiref==0.1.2
